@@ -58,17 +58,26 @@ public class MiniBotTeleop extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareMiniBot robot           = new HardwareMiniBot();   // Use a Pushbot's hardware
-                                                               // could also use HardwarePushbotMatrix class.
+    static double joy_threshold = 0.03;                                                          // could also use HardwarePushbotMatrix class.
 
     @Override
     public void runOpMode() {
-        double left;
-        double right;
+        double left=0;
+        double right=0;
         double max;
+        double prev_right_y=0;
+        double prev_left_y=0;
         double speedscale = 0.5;
+        int left_event_counter =0;
+        int right_event_counter =0;
+        int loop_count = 0;
+        int delay_scale = 100;
+
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
+        double power_steps [] = {0.0, 0.5, 0.7, 0.85, 0.95, 1.0};
+        int n_steps = 6;
         robot.init(hardwareMap);
 
         // Send telemetry message to signify robot waiting;
@@ -83,8 +92,45 @@ public class MiniBotTeleop extends LinearOpMode {
 
             // Run wheels in POV mode (note: The joystick goes negative when pushed forwards, so negate it)
             // In this mode the Left stick moves the robot fwd and back, the Right stick turns left and right.
-            left = -gamepad1.left_stick_y;
-            right = -gamepad1.right_stick_y;
+            // if (Math.abs(prev_left_y - gamepad1.left_stick_y)>0) {
+            if (left==0.0 && Math.abs(gamepad1.left_stick_y)>joy_threshold) {
+                left_event_counter = 1;
+            } else if (left>0.1 && Math.abs(gamepad1.left_stick_y)<joy_threshold) {
+                left_event_counter = 5;
+            } else {
+                if (Math.abs(gamepad1.left_stick_y)>joy_threshold) {
+                    if ((left_event_counter < n_steps-1) && (loop_count%delay_scale==4)) {
+                        left_event_counter++;
+                    }
+                } else {
+                    if ((left_event_counter > 0)&& (loop_count%delay_scale==4)) {
+                        left_event_counter--;
+                    }
+                }
+            }
+            // if (Math.abs(prev_right_y - gamepad1.right_stick_y)>0) {
+            if (right==0.0 && Math.abs(gamepad1.right_stick_y)>joy_threshold) {
+                right_event_counter = 1;
+            } else if (right>0.1 && Math.abs(gamepad1.right_stick_y)<joy_threshold) {
+                right_event_counter = 5;
+            } else {
+                if (Math.abs(gamepad1.right_stick_y)>joy_threshold) {
+                    if ((right_event_counter < n_steps-1) && (loop_count%delay_scale==4)) {
+                        right_event_counter++;
+                    }
+                } else {
+                    if ((right_event_counter > 0)&& (loop_count%delay_scale==4)) {
+                        right_event_counter--;
+                    }
+                }
+            }
+            //left_event_counter = right_event_counter = 5;
+            left = -gamepad1.left_stick_y*power_steps[left_event_counter];
+            right = -gamepad1.right_stick_y*power_steps[right_event_counter];
+            if ((loop_count%5)==1) {
+                prev_right_y = -gamepad1.right_stick_y;
+                prev_left_y = -gamepad1.left_stick_y;
+            }
 
             // Normalize the values so neither exceed +/- 1.0
             max = Math.max(Math.abs(left), Math.abs(right));
@@ -93,23 +139,29 @@ public class MiniBotTeleop extends LinearOpMode {
                 left /= max;
                 right /= max;
             }
+
             left *= speedscale;
             right *= speedscale;
             robot.leftMotor.setPower(left);
             robot.rightMotor.setPower(right);
-            if (gamepad1.y && (speedscale<1.0))
-                speedscale += 0.01;
-            if (gamepad1.a && (speedscale>0.2))
-                speedscale -= 0.01;
+            if (gamepad1.y && (speedscale<1.0)) {
+                speedscale += 0.05;
+                //robot.waitForTick(40);
+            }
+            else if (gamepad1.a && (speedscale>0.2)) {
+                speedscale -= 0.05;
+                //robot.waitForTick(40);
+            }
 
-            telemetry.addData("left_motor  =", "%.2f", left);
-            telemetry.addData("right_motor =", "%.2f", right);
+            telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
+            // telemetry.addData("prev left/right y  =", "%.2f/%.2f", prev_left_y,prev_right_y);
+            telemetry.addData("left/right counter =", "%d/%d", left_event_counter, right_event_counter);
             telemetry.addData("speed scale =", "%.2f", speedscale);
             telemetry.update();
 
-
             // Pause for metronome tick.  40 mS each cycle = update 25 times a second.
             robot.waitForTick(40);
+            loop_count++;
         }
     }
 }
