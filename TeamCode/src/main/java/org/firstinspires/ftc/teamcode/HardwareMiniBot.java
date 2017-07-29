@@ -31,6 +31,7 @@ public class HardwareMiniBot
     /* Public OpMode members. */
     public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
+    public Servo sv1 = null;
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -75,6 +76,11 @@ public class HardwareMiniBot
         rightMotor  = hwMap.dcMotor.get("right_drive");
         leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        //Define and Initialize Servos
+        sv1 = hwMap.servo.get("servo1");
+        sv1.setPosition(0.5);
 
         // Set all motors to zero power
         leftMotor.setPower(0);
