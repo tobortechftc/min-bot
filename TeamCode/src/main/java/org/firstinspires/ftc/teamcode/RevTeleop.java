@@ -107,7 +107,7 @@ public class RevTeleop extends LinearOpMode {
             }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
-            telemetry.addData("imu heading =", "%.2f", robot.angles.firstAngle);
+            telemetry.addData("imu heading =", "%.2f", robot.imu_heading());
             telemetry.update();
             robot.waitForTick(40);
         }
