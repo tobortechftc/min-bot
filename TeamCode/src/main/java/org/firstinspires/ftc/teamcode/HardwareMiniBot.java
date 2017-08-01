@@ -41,8 +41,8 @@ public class HardwareMiniBot extends LinearOpMode {
     final static double INCHES_PER_ROTATION = 12.57; // inches per chassis motor rotation based on 16/24 gear ratio
     final static double GYRO_ROTATION_RATIO_L = 0.65; // 0.83; // Ratio of Gyro Sensor Left turn to prevent overshooting the turn.
     final static double GYRO_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of Gyro Sensor Right turn to prevent overshooting the turn.
-    final static double NAVX_ROTATION_RATIO_L = 0.75; // 0.84; // Ratio of NavX Sensor Left turn to prevent overshooting the turn.
-    final static double NAVX_ROTATION_RATIO_R = 0.75; // 0.84; // Ratio of NavX Sensor Right turn to prevent overshooting the turn.
+    final static double NAVX_ROTATION_RATIO_L = 0.65; // 0.84; // Ratio of NavX Sensor Left turn to prevent overshooting the turn.
+    final static double NAVX_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of NavX Sensor Right turn to prevent overshooting the turn.
     final static double DRIVE_RATIO_L = 0.9; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
@@ -344,6 +344,61 @@ public class HardwareMiniBot extends LinearOpMode {
 
                 if (heading_cross_zero && (current_pos <= -180)) {
                     current_pos += 360;
+                }
+                driveTT(leftPower, rightPower);
+            }
+        } else {
+            if (use_encoder) {
+                run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
+            } else {
+                long degree_in_ms = 33 * (long) degree;
+                driveTT(leftPower, rightPower);
+                sleep(degree_in_ms);
+                driveTT(0, 0);
+            }
+        }
+        driveTT(0, 0);
+        if (!fast_mode)
+            sleep(135);
+    }
+    public void TurnLeftD(double power, double degree) throws InterruptedException {
+        double adjust_degree_gyro = GYRO_ROTATION_RATIO_L * (double) degree;
+        double adjust_degree_navx = NAVX_ROTATION_RATIO_L * (double) degree;
+        double current_pos = 0;
+        boolean heading_cross_zero = false;
+        ElapsedTime     runtime = new ElapsedTime();
+        reset_chassis();
+        //set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //motorBL.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS)
+        int leftEncode = leftMotor.getCurrentPosition();
+        int rightEncode = rightMotor.getCurrentPosition();
+        leftCnt = (int) (-ONE_ROTATION * RROBOT * degree / 720.0);
+        rightCnt = (int) (ONE_ROTATION * RROBOT * degree / 720.0);
+
+        leftPower = (float) -power;
+        rightPower = (float) power;
+
+        leftCnt += leftEncode;
+        rightCnt += rightEncode;
+
+
+        DbgLog.msg(String.format("imu Left Turn %.2f degree with %.2f power.", degree, power));
+        if (use_imu) {
+            current_pos = imu_heading();
+            target_heading = current_pos + adjust_degree_navx;
+            if (target_heading >= 0) {
+                target_heading -= 360;
+                heading_cross_zero = true;
+            }
+            if (heading_cross_zero && (current_pos >= -180)) {
+                current_pos -= 360;
+            }
+            DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
+            while ((current_pos <= target_heading) && (runtime.seconds() < 5.0)) {
+                current_pos = imu_heading();
+                if (heading_cross_zero && (current_pos >= -180)) {
+                    current_pos -= 360;
                 }
                 driveTT(leftPower, rightPower);
             }

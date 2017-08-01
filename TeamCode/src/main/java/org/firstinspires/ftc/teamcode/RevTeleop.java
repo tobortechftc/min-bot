@@ -107,7 +107,10 @@ public class RevTeleop extends HardwareMiniBot {
             }
 
             if (gamepad1.dpad_right) {
-                robot.TurnRightD(0.6, 90.0);
+                robot.TurnRightD(0.2, 90.0);
+            }
+            if (gamepad1.dpad_left) {
+                robot.TurnLeftD(0.2, 90.0);
             }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
