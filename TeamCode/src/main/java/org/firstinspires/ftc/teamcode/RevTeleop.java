@@ -54,14 +54,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
  */
 
 @TeleOp(name="MiniBot: RevTeleop", group="MiniBot")
-public class RevTeleop extends LinearOpMode {
+public class RevTeleop extends HardwareMiniBot {
 
     /* Declare OpMode members. */
     HardwareMiniBot robot           = new HardwareMiniBot();   // Use a Pushbot's hardware
     static double joy_threshold = 0.03;                                                          // could also use HardwarePushbotMatrix class.
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         double left=0;
         double right=0;
         double max;
@@ -90,7 +90,7 @@ public class RevTeleop extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             // read IMU angles: heading, roll, pitch
-            robot.angles   = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
 
             // read joysticks for tank drive
             left = -gamepad1.left_stick_y;
@@ -105,11 +105,15 @@ public class RevTeleop extends LinearOpMode {
             else if (gamepad1.a && (speedscale>0.2)) {
                 speedscale -= 0.05;
             }
+
+            if (gamepad1.dpad_right) {
+                robot.TurnRightD(0.6, 90.0);
+            }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
             telemetry.addData("imu heading =", "%.2f", robot.imu_heading());
             telemetry.update();
-            robot.waitForTick(40);
+            // robot.waitForTick(40);
         }
     }
 }

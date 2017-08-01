@@ -1,16 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Runtime.getRuntime;
+import static java.lang.Thread.sleep;
 
 /**
  * This is NOT an opmode.
@@ -29,8 +35,7 @@ import static java.lang.Runtime.getRuntime;
  * Servo channel:  Servo to open right claw: "right_hand"
  */
 
-public class HardwareMiniBot
-{
+public class HardwareMiniBot extends LinearOpMode {
     final static int ONE_ROTATION = 1120; // for AndyMark-40 motor encoder one rotation
     final static double RROBOT = 6.63;  // number of wheel turns to get chassis 360-degree turn
     final static double INCHES_PER_ROTATION = 12.57; // inches per chassis motor rotation based on 16/24 gear ratio
@@ -47,6 +52,7 @@ public class HardwareMiniBot
     public Servo sv1 = null;
 
     public boolean use_imu = true;
+    public boolean use_encoder = false;
     public boolean fast_mode = false;
     public double target_heading = 0.0;
     public float leftPower = 0;
@@ -68,6 +74,11 @@ public class HardwareMiniBot
 
     /* Constructor */
     public HardwareMiniBot(){
+
+    }
+
+    @Override
+    public void runOpMode() throws InterruptedException {
 
     }
 
@@ -129,23 +140,25 @@ public class HardwareMiniBot
 
         // sleep for the remaining portion of the regular cycle period.
         if (remaining > 0) {
-            try {
-                Thread.sleep(remaining);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            //try {
+                sleep(remaining);
+            //} catch (InterruptedException e) {
+            //    Thread.currentThread().interrupt();
+            //}
         }
 
         // Reset the cycle clock for the next pass.
         period.reset();
     }
     public double imu_heading() {
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
     public void driveTT(double lp, double rp) {
         if(!fast_mode && (Math.abs(lp-rp)<0.01)) { // expect to go straight
-            if (use_imu) {
+            //if (use_imu) {
+            if (false) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
                     if (rp > 0) rp *= 0.85;
@@ -169,6 +182,14 @@ public class HardwareMiniBot
     void stop_chassis() {
         leftMotor.setPower(0);
         rightMotor.setPower(0);
+    }
+    void reset_chassis()  {
+        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftCnt = 0;
+        rightCnt = 0;
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     void stop_tobot() {
@@ -287,5 +308,58 @@ public class HardwareMiniBot
         return l_return;
     } // have_encoders_reached
 
+    public void TurnRightD(double power, double degree) throws InterruptedException {
+        double adjust_degree_gyro = GYRO_ROTATION_RATIO_R * (double) degree;
+        double adjust_degree_navx = NAVX_ROTATION_RATIO_R * (double) degree;
+        double current_pos = 0;
+        boolean heading_cross_zero = false;
+        ElapsedTime     runtime = new ElapsedTime();
+        reset_chassis();
+        //set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //motorBL.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        int leftEncode = leftMotor.getCurrentPosition();
+        int rightEncode = rightMotor.getCurrentPosition();
+            leftCnt = (int) (ONE_ROTATION * RROBOT * degree / 720.0);
+            rightCnt = (int) (-ONE_ROTATION * RROBOT * degree / 720.0);
+            rightPower = (float) -power;
+
+        leftCnt += leftEncode;
+        rightCnt += rightEncode;
+        leftPower = (float) power;
+        DbgLog.msg(String.format("imu Right Turn %.2f degree with %.2f power.", degree, power));
+       if (use_imu) {
+            current_pos = imu_heading();
+            target_heading = current_pos - adjust_degree_navx;
+            if (target_heading <= -360) {
+                target_heading += 360;
+                heading_cross_zero = true;
+            }
+            if (heading_cross_zero && (current_pos <= -180)) {
+                current_pos += 360;
+            }
+            while ((current_pos >= target_heading) && (runtime.seconds() < 4.0)) {
+                current_pos = imu_heading();
+                // DbgLog.msg(String.format("imu current/target heading = %.2f/%.2f",current_pos,target_heading));
+
+                if (heading_cross_zero && (current_pos <= -180)) {
+                    current_pos += 360;
+                }
+                driveTT(leftPower, rightPower);
+            }
+        } else {
+            if (use_encoder) {
+                run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
+            } else {
+                long degree_in_ms = 33 * (long) degree;
+                driveTT(leftPower, rightPower);
+                sleep(degree_in_ms);
+                driveTT(0, 0);
+            }
+        }
+        driveTT(0, 0);
+        if (!fast_mode)
+            sleep(135);
+    }
 }
 
