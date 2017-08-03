@@ -34,6 +34,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -79,9 +80,16 @@ public class RevTeleop extends HardwareMiniBot {
         double power_steps [] = {0.0, 0.5, 0.7, 0.85, 0.95, 1.0};
         int n_steps = 6;
         robot.init(hardwareMap);
+        // DcMotor mt = encMotor;
+        encMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        idle();
+        encMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // int val = encMotor.getCurrentPosition();
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
+        // telemetry.addData("current_encoder =", "%7d", val);
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -90,7 +98,6 @@ public class RevTeleop extends HardwareMiniBot {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
             // read IMU angles: heading, roll, pitch
-
 
             // read joysticks for tank drive
             left = -gamepad1.left_stick_y;
@@ -112,9 +119,14 @@ public class RevTeleop extends HardwareMiniBot {
             if (gamepad1.dpad_left) {
                 robot.TurnLeftD(0.2, 90.0);
             }
+            if (gamepad1.dpad_up) {
+                robot.StraightIn(0.6, 40);
+            }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
             telemetry.addData("imu heading =", "%.2f", robot.imu_heading());
+            // telemetry.addData("current_encoder =", "%d/%d", encMotor.getCurrentPosition(),mt.getCurrentPosition());
+            // telemetry.addData("current_encoder =", "%7d", encMotor.getCurrentPosition());
             telemetry.update();
             // robot.waitForTick(40);
         }

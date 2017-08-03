@@ -49,10 +49,11 @@ public class HardwareMiniBot extends LinearOpMode {
     /* Public OpMode members. */
     public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
+    public DcMotor  encMotor = null;
     public Servo sv1 = null;
 
     public boolean use_imu = true;
-    public boolean use_encoder = false;
+    public boolean use_encoder = true;
     public boolean fast_mode = false;
     public double target_heading = 0.0;
     public float leftPower = 0;
@@ -107,6 +108,10 @@ public class HardwareMiniBot extends LinearOpMode {
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
         rightMotor  = hwMap.dcMotor.get("right_drive");
+        encMotor    = hwMap.dcMotor.get("enmotor");
+
+        encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -157,8 +162,7 @@ public class HardwareMiniBot extends LinearOpMode {
 
     public void driveTT(double lp, double rp) {
         if(!fast_mode && (Math.abs(lp-rp)<0.01)) { // expect to go straight
-            //if (use_imu) {
-            if (false) {
+            if (use_imu) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
                     if (rp > 0) rp *= 0.85;
@@ -177,6 +181,8 @@ public class HardwareMiniBot extends LinearOpMode {
             rightMotor.setPower(rp);
             leftMotor.setPower(lp);
         }
+        if (use_encoder)
+            encMotor.setPower(lp);
     }
 
     void stop_chassis() {
@@ -247,12 +253,13 @@ public class HardwareMiniBot extends LinearOpMode {
     }
 
     boolean has_left_drive_encoder_reached(double p_count) {
+        DcMotor mt = encMotor;
         if (leftPower < 0) {
             //return (Math.abs(motorFL.getCurrentPosition()) < p_count);
-            return (leftMotor.getCurrentPosition() <= p_count);
+            return (mt.getCurrentPosition() <= p_count);
         } else {
             //return (Math.abs(motorFL.getCurrentPosition()) > p_count);
-            return (leftMotor.getCurrentPosition() >= p_count);
+            return (mt.getCurrentPosition() >= p_count);
         }
     } // has_left_drive_encoder_reached
 
@@ -265,10 +272,11 @@ public class HardwareMiniBot extends LinearOpMode {
      * Indicate whether the right drive motor's encoder has reached a value.
      */
     boolean has_right_drive_encoder_reached(double p_count) {
+        DcMotor mt = encMotor;
         if (rightPower < 0) {
-            return (rightMotor.getCurrentPosition() <= p_count);
+            return (mt.getCurrentPosition() <= p_count);
         } else {
-            return (rightMotor.getCurrentPosition() >= p_count);
+            return (mt.getCurrentPosition() >= p_count);
         }
 
     } // has_right_drive_encoder_reached
@@ -277,11 +285,12 @@ public class HardwareMiniBot extends LinearOpMode {
      * Indicate whether the drive motors' encoders have reached specified values.
      */
     boolean have_drive_encoders_reached(double p_left_count, double p_right_count) {
+        DcMotor mt = encMotor;
         boolean l_return = false;
         if (has_left_drive_encoder_reached(p_left_count) && has_right_drive_encoder_reached(p_right_count)) {
             l_return = true;
         } else if (has_left_drive_encoder_reached(p_left_count)) { // shift target encoder value from right to left
-            double diff = Math.abs(p_right_count - rightMotor.getCurrentPosition()) / 2;
+            double diff = Math.abs(p_right_count - mt.getCurrentPosition()) / 2;
             if (leftPower < 0) {
                 leftCnt -= diff;
             } else {
@@ -293,7 +302,7 @@ public class HardwareMiniBot extends LinearOpMode {
                 rightCnt -= diff;
             }
         } else if (has_right_drive_encoder_reached(p_right_count)) { // shift target encoder value from left to right
-            double diff = Math.abs(p_left_count - leftMotor.getCurrentPosition()) / 2;
+            double diff = Math.abs(p_left_count - mt.getCurrentPosition()) / 2;
             if (rightPower < 0) {
                 rightCnt -= diff;
             } else {
@@ -309,6 +318,7 @@ public class HardwareMiniBot extends LinearOpMode {
     } // have_encoders_reached
 
     public void TurnRightD(double power, double degree) throws InterruptedException {
+
         double adjust_degree_gyro = GYRO_ROTATION_RATIO_R * (double) degree;
         double adjust_degree_navx = NAVX_ROTATION_RATIO_R * (double) degree;
         double current_pos = 0;
@@ -415,6 +425,48 @@ public class HardwareMiniBot extends LinearOpMode {
         driveTT(0, 0);
         if (!fast_mode)
             sleep(135);
+    }
+    public void StraightR(double power, double n_rotations) throws InterruptedException {
+        DcMotor mt = encMotor;
+        reset_chassis();
+        // set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        int leftEncode = mt.getCurrentPosition();
+        int rightEncode = mt.getCurrentPosition();
+        //motorBL.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+        leftCnt = (int) (ONE_ROTATION * n_rotations);
+        rightCnt = (int) (ONE_ROTATION * n_rotations);
+        leftPower = rightPower = (float) power;
+        if (power < 0) { // move backward
+            leftCnt = leftEncode - leftCnt;
+            rightCnt = rightEncode - rightCnt;
+        } else {
+            leftCnt += leftEncode;
+            rightCnt += rightEncode;
+        }
+        run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
+
+        if (!fast_mode)
+            sleep(135);
+    }
+
+    public void StraightIn(double power, double in) throws InterruptedException {
+       if (use_imu) {
+            target_heading = imu_heading();
+        }
+        if (use_encoder) {
+            double numberR = in / INCHES_PER_ROTATION;
+            StraightR(power, numberR);
+        } else { // using timer
+            double in_per_ms = 0.014 * power / 0.8;
+            if (in_per_ms < 0) in_per_ms *= -1.0;
+            long msec = (long) (in / in_per_ms);
+            if (msec < 100) msec = 100;
+            if (msec > 6000) msec = 6000; // limit to 6 sec
+            driveTT(power, power);
+            sleep(msec);
+            driveTT(0, 0);
+        }
     }
 }
 
