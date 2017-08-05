@@ -55,7 +55,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
  */
 
 @TeleOp(name="MiniBot: RevTeleop", group="MiniBot")
-public class RevTeleop extends HardwareMiniBot {
+public class RevTeleop extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareMiniBot robot           = new HardwareMiniBot();   // Use a Pushbot's hardware
@@ -80,16 +80,16 @@ public class RevTeleop extends HardwareMiniBot {
         double power_steps [] = {0.0, 0.5, 0.7, 0.85, 0.95, 1.0};
         int n_steps = 6;
         robot.init(hardwareMap);
-        // DcMotor mt = encMotor;
-        encMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        DcMotor mt = robot.encMotor;
+        robot.encMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         idle();
-        encMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        robot.encMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // int val = encMotor.getCurrentPosition();
+        int val = robot.encMotor.getCurrentPosition();
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
-        // telemetry.addData("current_encoder =", "%7d", val);
+        telemetry.addData("current_encoder =", "%7d", val);
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -122,10 +122,13 @@ public class RevTeleop extends HardwareMiniBot {
             if (gamepad1.dpad_up) {
                 robot.StraightIn(0.6, 40);
             }
+            if (gamepad1.dpad_down) {
+                robot.StraightIn(-0.6, 40);
+            }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
-            telemetry.addData("imu heading =", "%.2f", robot.imu_heading());
-            // telemetry.addData("current_encoder =", "%d/%d", encMotor.getCurrentPosition(),mt.getCurrentPosition());
+            telemetry.addData("tar/curr heading =", "%.2f/%.2f", robot.target_heading, robot.imu_heading());
+            telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
             // telemetry.addData("current_encoder =", "%7d", encMotor.getCurrentPosition());
             telemetry.update();
             // robot.waitForTick(40);

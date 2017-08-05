@@ -35,7 +35,7 @@ import static java.lang.Thread.sleep;
  * Servo channel:  Servo to open right claw: "right_hand"
  */
 
-public class HardwareMiniBot extends LinearOpMode {
+public class HardwareMiniBot { // extends LinearOpMode {
     final static int ONE_ROTATION = 1120; // for AndyMark-40 motor encoder one rotation
     final static double RROBOT = 6.63;  // number of wheel turns to get chassis 360-degree turn
     final static double INCHES_PER_ROTATION = 12.57; // inches per chassis motor rotation based on 16/24 gear ratio
@@ -43,7 +43,7 @@ public class HardwareMiniBot extends LinearOpMode {
     final static double GYRO_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of Gyro Sensor Right turn to prevent overshooting the turn.
     final static double NAVX_ROTATION_RATIO_L = 0.65; // 0.84; // Ratio of NavX Sensor Left turn to prevent overshooting the turn.
     final static double NAVX_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of NavX Sensor Right turn to prevent overshooting the turn.
-    final static double DRIVE_RATIO_L = 0.9; //control veering by lowering left motor power
+    final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
     /* Public OpMode members. */
@@ -55,6 +55,7 @@ public class HardwareMiniBot extends LinearOpMode {
     public boolean use_imu = true;
     public boolean use_encoder = true;
     public boolean fast_mode = false;
+    public boolean straight_mode = false;
     public double target_heading = 0.0;
     public float leftPower = 0;
     public float rightPower = 0;
@@ -78,10 +79,10 @@ public class HardwareMiniBot extends LinearOpMode {
 
     }
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-
-    }
+    //@Override
+    //public void runOpMode() throws InterruptedException {
+//
+  //  }
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap) {
@@ -145,35 +146,36 @@ public class HardwareMiniBot extends LinearOpMode {
 
         // sleep for the remaining portion of the regular cycle period.
         if (remaining > 0) {
-            //try {
-                sleep(remaining);
-            //} catch (InterruptedException e) {
-            //    Thread.currentThread().interrupt();
-            //}
+            try {
+                Thread.sleep(remaining);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
         // Reset the cycle clock for the next pass.
         period.reset();
     }
+
     public double imu_heading() {
         angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
     public void driveTT(double lp, double rp) {
-        if(!fast_mode && (Math.abs(lp-rp)<0.01)) { // expect to go straight
+        if(!fast_mode && straight_mode) { // expect to go straight
             if (use_imu) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
-                    if (rp > 0) rp *= 0.85;
-                    else lp *= 0.85;
+                    if (rp > 0) rp *= 0.5;
+                    else lp *= 0.5;
                 } else if (cur_heading - target_heading < -0.7) { // crook to right, slow down left motor
-                    if (lp > 0) lp *= 0.85;
-                    else rp *= 0.85;
+                    if (lp > 0) lp *= 0.5;
+                    else rp *= 0.5;
                 }
             }
         }
-        if (Math.abs(rp) > 0.4 && Math.abs(lp) > 0.4) {
+        if (Math.abs(rp) > 0.3 && Math.abs(lp) > 0.3) {
             rightMotor.setPower(rp * DRIVE_RATIO_R);
             leftMotor.setPower(lp * DRIVE_RATIO_L);
         }
@@ -182,12 +184,13 @@ public class HardwareMiniBot extends LinearOpMode {
             leftMotor.setPower(lp);
         }
         if (use_encoder)
-            encMotor.setPower(lp);
+            encMotor.setPower(Math.max(lp,rp));
     }
 
     void stop_chassis() {
         leftMotor.setPower(0);
         rightMotor.setPower(0);
+        encMotor.setPower(0);
     }
     void reset_chassis()  {
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -428,6 +431,7 @@ public class HardwareMiniBot extends LinearOpMode {
     }
     public void StraightR(double power, double n_rotations) throws InterruptedException {
         DcMotor mt = encMotor;
+        straight_mode = true;
         reset_chassis();
         // set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
         int leftEncode = mt.getCurrentPosition();
@@ -445,7 +449,7 @@ public class HardwareMiniBot extends LinearOpMode {
             rightCnt += rightEncode;
         }
         run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
-
+        straight_mode = false;
         if (!fast_mode)
             sleep(135);
     }
