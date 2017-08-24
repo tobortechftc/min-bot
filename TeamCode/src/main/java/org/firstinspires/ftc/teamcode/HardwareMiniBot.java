@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static java.lang.Runtime.getRuntime;
@@ -50,7 +52,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
     public DcMotor  encMotor = null;
-    public Servo sv1 = null;
+//    public Servo sv1 = null;
+    public ModernRoboticsI2cRangeSensor rangeSensor;
 
     public boolean use_imu = true;
     public boolean use_encoder = true;
@@ -109,17 +112,18 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
         rightMotor  = hwMap.dcMotor.get("right_drive");
-        encMotor    = hwMap.dcMotor.get("enmotor");
+//        encMotor    = hwMap.dcMotor.get("enmotor");
+        rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
 
-        encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
         rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Define and Initialize Servos
-        sv1 = hwMap.servo.get("servo1");
-        sv1.setPosition(0.5);
+//        sv1 = hwMap.servo.get("servo1");
+//       sv1.setPosition(0.5);
 
         // Set all motors to zero power
         leftMotor.setPower(0);
@@ -190,7 +194,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     void stop_chassis() {
         leftMotor.setPower(0);
         rightMotor.setPower(0);
-        encMotor.setPower(0);
+        //encMotor.setPower(0);
     }
     void reset_chassis()  {
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -207,6 +211,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
+
+
         //motorFR.setTargetPosition(rightCnt);
         //motorBL.setTargetPosition(leftCnt);
         //motorBL.setMode(DcMotorController.RunMode.RUN_TO_POSITION);

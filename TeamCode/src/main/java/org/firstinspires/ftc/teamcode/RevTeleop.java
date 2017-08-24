@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -80,16 +81,16 @@ public class RevTeleop extends LinearOpMode {
         double power_steps [] = {0.0, 0.5, 0.7, 0.85, 0.95, 1.0};
         int n_steps = 6;
         robot.init(hardwareMap);
-        DcMotor mt = robot.encMotor;
-        robot.encMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        //DcMotor mt = robot.encMotor;
+        //robot.encMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         idle();
-        robot.encMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //robot.encMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        int val = robot.encMotor.getCurrentPosition();
+        //int val = robot.encMotor.getCurrentPosition();
 
         // Send telemetry message to signify robot waiting;
         telemetry.addData("Say", "Hello Driver");    //
-        telemetry.addData("current_encoder =", "%7d", val);
+        //telemetry.addData("current_encoder =", "%7d", val);
         telemetry.update();
 
         // Wait for the game to start (driver presses PLAY)
@@ -128,7 +129,11 @@ public class RevTeleop extends LinearOpMode {
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
             telemetry.addData("tar/curr heading =", "%.2f/%.2f", robot.target_heading, robot.imu_heading());
-            telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
+            telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
+            telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
+            telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
+            telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
+            //telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
             // telemetry.addData("current_encoder =", "%7d", encMotor.getCurrentPosition());
             telemetry.update();
             // robot.waitForTick(40);
