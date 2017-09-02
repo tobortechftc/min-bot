@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -64,10 +65,16 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public float rightPower = 0;
     public int leftCnt = 0; // left motor target counter
     public int rightCnt = 0; // right motor target counter
+    public float hsvValues[] = {0F,0F,0F};
+
+    // values is a reference to the hsvValues array.
+    final float values[] = hsvValues;
 
 
     // The IMU sensor object
     BNO055IMU imu;
+    ColorSensor colorSensor;    // Hardware Device Object
+
 
     // State used for updating telemetry
     Orientation angles;
@@ -95,6 +102,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
+
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -112,8 +120,9 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
         rightMotor  = hwMap.dcMotor.get("right_drive");
-//        encMotor    = hwMap.dcMotor.get("enmotor");
+
         rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
+        //encMotor    = hwMap.dcMotor.get("enmotor");
 
         //encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -122,8 +131,10 @@ public class HardwareMiniBot { // extends LinearOpMode {
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Define and Initialize Servos
-//        sv1 = hwMap.servo.get("servo1");
-//       sv1.setPosition(0.5);
+        //sv1 = hwMap.servo.get("servo1");
+        //sv1.setPosition(0.5);
+        colorSensor = hwMap.colorSensor.get("rev_co");
+        colorSensor.enableLed(true);
 
         // Set all motors to zero power
         leftMotor.setPower(0);
@@ -188,7 +199,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
             leftMotor.setPower(lp);
         }
         if (use_encoder)
-            encMotor.setPower(Math.max(lp,rp));
+            ;//encMotor.setPower(Math.max(lp,rp));
     }
 
     void stop_chassis() {

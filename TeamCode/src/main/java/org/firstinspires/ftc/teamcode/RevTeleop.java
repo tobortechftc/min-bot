@@ -32,6 +32,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -127,13 +129,25 @@ public class RevTeleop extends LinearOpMode {
                 robot.StraightIn(-0.6, 40);
             }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
-            telemetry.addData("speed scale =", "%.2f", speedscale);
+            telemetry.addData("speed scale =", "%.2f",
+
+                    speedscale);
             telemetry.addData("tar/curr heading =", "%.2f/%.2f", robot.target_heading, robot.imu_heading());
             telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
             telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
             telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
             telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
             //telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
+            Color.RGBToHSV(robot.colorSensor.red() * 8, robot.colorSensor.green() * 8, robot.colorSensor.blue() * 8, robot.hsvValues);
+
+            // send the info back to driver station using telemetry function.
+           // telemetry.addData("LED", ? "On" : "Off");
+            telemetry.addData("Clear", robot.colorSensor.alpha());
+            telemetry.addData("Red  ", robot.colorSensor.red());
+            telemetry.addData("Green", robot.colorSensor.green());
+            telemetry.addData("Blue ", robot.colorSensor.blue());
+            telemetry.addData("Hue", robot.hsvValues[0]);
+            // telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
             // telemetry.addData("current_encoder =", "%7d", encMotor.getCurrentPosition());
             telemetry.update();
             // robot.waitForTick(40);
