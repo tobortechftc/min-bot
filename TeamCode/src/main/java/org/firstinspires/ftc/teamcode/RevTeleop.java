@@ -119,6 +119,8 @@ public class RevTeleop extends LinearOpMode {
             if (gamepad1.dpad_right) {
                 robot.TurnRightD(0.2, 90.0);
             }
+
+
             if (gamepad1.dpad_left) {
                 robot.TurnLeftD(0.2, 90.0);
             }
@@ -128,14 +130,55 @@ public class RevTeleop extends LinearOpMode {
             if (gamepad1.dpad_down) {
                 robot.StraightIn(-0.6, 40);
             }
-            telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
-            telemetry.addData("speed scale =", "%.2f",
+            if (gamepad1.left_bumper) {
+                robot.goUntilWhite(0.1);
+            }
+            if (gamepad2.dpad_up) {
+                double pos = robot.sv_shoulder.getPosition();
+                if (pos < 0.99) {
+                    robot.sv_shoulder.setPosition(pos + 0.01);
+                }
+            }
+            if (gamepad2.dpad_down) {
+                double pos = robot.sv_shoulder.getPosition();
+                if (pos > 0.01) {
+                    robot.sv_shoulder.setPosition(pos - 0.01);
+                }
+            }
+            if (gamepad2.dpad_right) {
+                double pos = robot.sv_elbow.getPosition();
+                if (pos < 0.99) {
+                    robot.sv_elbow.setPosition(pos + 0.01);
+                }
+            }
+            if (gamepad2.dpad_left) {
+                double pos = robot.sv_elbow.getPosition();
+                if (pos > 0.01) {
+                    robot.sv_elbow.setPosition(pos - 0.01);
+                }
+            }
+            if (gamepad2.a) {
+                robot.sv_elbow.setPosition(0.76);
+            }
+            if (gamepad2.y) {
+                robot.sv_elbow.setPosition(0.1883);
+            }
+            if (gamepad2.x) {
+                robot.sv_shoulder.setPosition(0.4);
+            }
+            if (gamepad2.b) {
+                robot.sv_shoulder.setPosition(0.7094);
+            }
+            if (gamepad2.left_bumper) {
+                robot.sv_shoulder.setPosition(0.54);
+            }
 
-                    speedscale);
+            telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
+            telemetry.addData("speed scale =", "%.2f", speedscale);
             telemetry.addData("tar/curr heading =", "%.2f/%.2f", robot.target_heading, robot.imu_heading());
             telemetry.addData("raw ultrasonic", robot.rangeSensor.rawUltrasonic());
-            telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
-            telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
+            // telemetry.addData("raw optical", robot.rangeSensor.rawOptical());
+            // telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
             telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
             //telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
             Color.RGBToHSV(robot.colorSensor.red() * 8, robot.colorSensor.green() * 8, robot.colorSensor.blue() * 8, robot.hsvValues);
@@ -147,6 +190,8 @@ public class RevTeleop extends LinearOpMode {
             telemetry.addData("Green", robot.colorSensor.green());
             telemetry.addData("Blue ", robot.colorSensor.blue());
             telemetry.addData("Hue", robot.hsvValues[0]);
+            telemetry.addData("Elbow", "%5.4f", robot.sv_elbow.getPosition());
+            telemetry.addData("Shoulder", "%5.4f", robot.sv_shoulder.getPosition());
             // telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
             // telemetry.addData("current_encoder =", "%7d", encMotor.getCurrentPosition());
             telemetry.update();

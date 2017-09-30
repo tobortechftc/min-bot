@@ -54,6 +54,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public DcMotor  rightMotor  = null;
     public DcMotor  encMotor = null;
 //    public Servo sv1 = null;
+    public Servo sv_shoulder;
+    public Servo sv_elbow;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
     public boolean use_imu = true;
@@ -66,6 +68,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public int leftCnt = 0; // left motor target counter
     public int rightCnt = 0; // right motor target counter
     public float hsvValues[] = {0F,0F,0F};
+    public static int color_white = 200;
 
     // values is a reference to the hsvValues array.
     final float values[] = hsvValues;
@@ -133,6 +136,10 @@ public class HardwareMiniBot { // extends LinearOpMode {
         //Define and Initialize Servos
         //sv1 = hwMap.servo.get("servo1");
         //sv1.setPosition(0.5);
+        sv_elbow = hwMap.servo.get("sv_elbow");
+        sv_shoulder = hwMap.servo.get("sv_shoulder");
+        sv_elbow.setPosition(0.1883);
+        sv_shoulder.setPosition(0.54);
         colorSensor = hwMap.colorSensor.get("rev_co");
         colorSensor.enableLed(true);
 
@@ -219,6 +226,17 @@ public class HardwareMiniBot { // extends LinearOpMode {
     void stop_tobot() {
         stop_chassis();
 
+    }
+
+    public void goUntilWhite(double power) throws InterruptedException {
+        ElapsedTime     runtime = new ElapsedTime();
+        driveTT(power, power);
+        int i = 0;
+        while (!detectWhite()  && (runtime.seconds() < 3) ) {
+            if ((++i % 10) == 0)
+                driveTT(power, power);
+        }
+        stop_chassis();
     }
 
     public void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
@@ -489,5 +507,19 @@ public class HardwareMiniBot { // extends LinearOpMode {
             driveTT(0, 0);
         }
     }
+    public boolean detectWhite() {
+
+
+    int cur_sum_of_color_sensor = 0;
+
+        cur_sum_of_color_sensor = colorSensor.alpha() + colorSensor.red() + colorSensor.green() + colorSensor.blue();
+        if (cur_sum_of_color_sensor >= color_white) {
+
+            return true;
+            }
+        return false;
+    }
+
 }
+
 
