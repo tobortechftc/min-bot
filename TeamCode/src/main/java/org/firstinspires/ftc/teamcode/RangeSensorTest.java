@@ -26,6 +26,7 @@ public class RangeSensorTest extends LinearOpMode {
         rightMotor = hardwareMap.get(DcMotor.class, "right_drive");
         leftMotor = hardwareMap.get(DcMotor.class, "left_drive");
         rangeSensor = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
+
         rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
 
         waitForStart();
