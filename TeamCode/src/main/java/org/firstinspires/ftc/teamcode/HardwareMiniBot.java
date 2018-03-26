@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.ftccommon.DbgLog;
+//import com.qualcomm.ftccommon.DbgLog;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -375,7 +375,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         leftCnt += leftEncode;
         rightCnt += rightEncode;
         leftPower = (float) power;
-        DbgLog.msg(String.format("imu Right Turn %.2f degree with %.2f power.", degree, power));
+        // DbgLog.msg(String.format("imu Right Turn %.2f degree with %.2f power.", degree, power));
        if (use_imu) {
             current_pos = imu_heading();
             target_heading = current_pos - adjust_degree_navx;
@@ -431,7 +431,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         rightCnt += rightEncode;
 
 
-        DbgLog.msg(String.format("imu Left Turn %.2f degree with %.2f power.", degree, power));
+        //DbgLog.msg(String.format("imu Left Turn %.2f degree with %.2f power.", degree, power));
         if (use_imu) {
             current_pos = imu_heading();
             target_heading = current_pos + adjust_degree_navx;
@@ -442,7 +442,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
             if (heading_cross_zero && (current_pos >= -180)) {
                 current_pos -= 360;
             }
-            DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
+            //DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
             while ((current_pos <= target_heading) && (runtime.seconds() < 5.0)) {
                 current_pos = imu_heading();
                 if (heading_cross_zero && (current_pos >= -180)) {
