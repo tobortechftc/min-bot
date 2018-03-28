@@ -54,12 +54,14 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public DcMotor  rightMotor  = null;
     public DcMotor  encMotor = null;
 //    public Servo sv1 = null;
-    public Servo sv_shoulder;
-    public Servo sv_elbow;
+    public Servo sv_shoulder = null;
+    public Servo sv_elbow = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
-    public boolean use_imu = true;
+    public boolean use_imu = false;
     public boolean use_encoder = true;
+    public boolean use_color_sensor = false;
+    public boolean use_arm = false;
     public boolean fast_mode = false;
     public boolean straight_mode = false;
     public double target_heading = 0.0;
@@ -75,7 +77,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
 
     // The IMU sensor object
-    BNO055IMU imu;
+    //BNO055IMU imu;
     ColorSensor colorSensor;    // Hardware Device Object
 
 
@@ -117,32 +119,35 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        imu = hwMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
+        //imu = hwMap.get(BNO055IMU.class, "imu");
+        //imu.initialize(parameters);
 
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
         rightMotor  = hwMap.dcMotor.get("right_drive");
 
-        rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
+        //rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
         //encMotor    = hwMap.dcMotor.get("enmotor");
 
         //encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        rightMotor.(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //Define and Initialize Servos
         //sv1 = hwMap.servo.get("servo1");
         //sv1.setPosition(0.5);
-        sv_elbow = hwMap.servo.get("sv_elbow");
-        sv_shoulder = hwMap.servo.get("sv_shoulder");
-        sv_elbow.setPosition(0.1883);
-        sv_shoulder.setPosition(0.54);
-        colorSensor = hwMap.colorSensor.get("rev_co");
-        colorSensor.enableLed(true);
-
+        if (use_arm) {
+            sv_elbow = hwMap.servo.get("sv_elbow");
+            sv_shoulder = hwMap.servo.get("sv_shoulder");
+            sv_elbow.setPosition(0.1883);
+            sv_shoulder.setPosition(0.54);
+        }
+        if (use_color_sensor) {
+            colorSensor = hwMap.colorSensor.get("rev_co");
+            colorSensor.enableLed(true);
+        }
         // Set all motors to zero power
         leftMotor.setPower(0);
         rightMotor.setPower(0);
@@ -180,7 +185,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public double imu_heading() {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        //angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
@@ -508,15 +513,14 @@ public class HardwareMiniBot { // extends LinearOpMode {
         }
     }
     public boolean detectWhite() {
-
-
-    int cur_sum_of_color_sensor = 0;
-
+        int cur_sum_of_color_sensor = 0;
+        if (!use_color_sensor) {
+            return false;
+        }
         cur_sum_of_color_sensor = colorSensor.alpha() + colorSensor.red() + colorSensor.green() + colorSensor.blue();
         if (cur_sum_of_color_sensor >= color_white) {
-
             return true;
-            }
+        }
         return false;
     }
 
