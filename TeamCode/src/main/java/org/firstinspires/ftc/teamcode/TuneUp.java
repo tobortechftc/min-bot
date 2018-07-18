@@ -60,9 +60,6 @@ public class TuneUp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double left;
-        double right;
-        double max;
         double speedscale = 0.5; // determine the maximum speed
 
         int cur_sv_ix = 0;
@@ -96,13 +93,13 @@ public class TuneUp extends LinearOpMode {
 
             if (robot.use_minibot) { // Unit Test for minibot
                 if (gamepad1.dpad_up) { // forward 24 inches
-                    robot.StraightIn(0.6, 24);
+                    robot.StraightIn(speedscale, 24);
                 } else if (gamepad1.dpad_left) { // left turn 90 degree
-                    robot.TurnLeftD(0.5, 90);
+                    robot.TurnLeftD(speedscale, 90);
                 } else if (gamepad1.dpad_right) { // right turn 90 degree
-                    robot.TurnRightD(0.5, 90);
+                    robot.TurnRightD(speedscale, 90);
                 } else if (gamepad1.dpad_down) { // backward 24 inches
-                    robot.StraightIn(-0.6, 24);
+                    robot.StraightIn(-1*speedscale, 24);
                 }
             }
 
@@ -112,6 +109,14 @@ public class TuneUp extends LinearOpMode {
             } else if (gamepad1.left_stick_y>0.1) {
                 INCREMENT -= 0.001;
                 if (INCREMENT<0.001) INCREMENT = 0.001;
+            }
+
+            if (gamepad1.right_stick_y<-0.1) {
+                speedscale += 0.01;
+                if (speedscale>1.0) speedscale = 1.0;
+            } else if (gamepad1.right_stick_y>0.1) {
+                speedscale -= 0.01;
+                if (speedscale<0.1) speedscale = 0.1;
             }
 
             if (gamepad1.back && gamepad1.a) {
@@ -155,7 +160,8 @@ public class TuneUp extends LinearOpMode {
                 sleep(400);
             }
 
-            telemetry.addData("0. GP1:", "x/b:sv sel, y/a:+/-%4.3f(ix=%d)", INCREMENT, cur_sv_ix);
+            telemetry.addData("0. ", "x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
+            telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f)", INCREMENT,speedscale);
             if (show_all) {
                 for (int i = 0; i < num_servos; i++) {
                     if (sv_list[i] != null) {
