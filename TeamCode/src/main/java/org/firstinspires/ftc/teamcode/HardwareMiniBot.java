@@ -49,35 +49,38 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
+    final static double KICKER_INIT = 0.5;
+    final static double KICKER_UP = 0.5;
+    final static double KICKER_DOWN = 0.5;
+
+    final static double ELBOW_INIT = 0.5;
+    final static double SHOULDER_INIT = 0.5;
+
     /* Public OpMode members. */
     public DcMotor  leftMotor   = null;
     public DcMotor  rightMotor  = null;
     public DcMotor  encMotor = null;
-//    public Servo sv1 = null;
     public Servo sv_shoulder = null;
     public Servo sv_elbow = null;
+    public Servo sv_kicker = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
-    public boolean use_imu = false;
+    public boolean use_minibot = true;
+    public boolean use_imu = true;
     public boolean use_encoder = true;
     public boolean use_color_sensor = false;
     public boolean use_arm = false;
-    public boolean fast_mode = false;
-    public boolean straight_mode = false;
+    public boolean use_kicker = true;
     public double target_heading = 0.0;
+    public boolean straight_mode = false;
     public float leftPower = 0;
     public float rightPower = 0;
     public int leftCnt = 0; // left motor target counter
     public int rightCnt = 0; // right motor target counter
-    public float hsvValues[] = {0F,0F,0F};
     public static int color_white = 200;
 
-    // values is a reference to the hsvValues array.
-    final float values[] = hsvValues;
-
-
     // The IMU sensor object
-    //BNO055IMU imu;
+    BNO055IMU imu;
     ColorSensor colorSensor;    // Hardware Device Object
 
 
@@ -119,8 +122,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        //imu = hwMap.get(BNO055IMU.class, "imu");
-        //imu.initialize(parameters);
+        imu = hwMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
 
         // Define and Initialize Motors
         leftMotor   = hwMap.dcMotor.get("left_drive");
@@ -131,18 +134,23 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
         //encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        rightMotor.(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
+        leftMotor.setDirection(DcMotor.Direction.FORWARD);
+        rightMotor.setDirection(DcMotor.Direction.REVERSE);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         //Define and Initialize Servos
         //sv1 = hwMap.servo.get("servo1");
         //sv1.setPosition(0.5);
         if (use_arm) {
             sv_elbow = hwMap.servo.get("sv_elbow");
             sv_shoulder = hwMap.servo.get("sv_shoulder");
-            sv_elbow.setPosition(0.1883);
-            sv_shoulder.setPosition(0.54);
+            sv_elbow.setPosition(ELBOW_INIT);
+            sv_shoulder.setPosition(SHOULDER_INIT);
+        }
+        if (use_kicker) {
+            sv_kicker = hwMap.servo.get("sv_kicker");
+            sv_kicker.setPosition(KICKER_INIT);
         }
         if (use_color_sensor) {
             colorSensor = hwMap.colorSensor.get("rev_co");
@@ -152,11 +160,9 @@ public class HardwareMiniBot { // extends LinearOpMode {
         leftMotor.setPower(0);
         rightMotor.setPower(0);
 
-        // Set all motors to run without encoders.
-        // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        // Use RUN_USING_ENCODERS for better speed control even encoder is not used.
+        leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     /***
@@ -185,12 +191,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public double imu_heading() {
-        //angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
     public void driveTT(double lp, double rp) {
-        if(!fast_mode && straight_mode) { // expect to go straight
+        if(straight_mode) { // expect to go straight
             if (use_imu) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
@@ -244,53 +250,14 @@ public class HardwareMiniBot { // extends LinearOpMode {
         stop_chassis();
     }
 
+
     public void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
-
-
-        //motorFR.setTargetPosition(rightCnt);
-        //motorBL.setTargetPosition(leftCnt);
-        //motorBL.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        //motorFR.setMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        //waitOneFullHardwareCycle();
         ElapsedTime     runtime = new ElapsedTime();
-
-        int leftTC1 = leftCnt;
-        int rightTC1 = rightCnt;
-        int leftTC2 = 0;
-        int rightTC2 = 0;
-        int leftTC0 = 0;
-        int rightTC0 = 0;
-        double initLeftPower = leftPower;
-        double initRightPower = rightPower;
-        if (leftPower > 0.4 && leftTC1 > 600 && !fast_mode) {
-            leftTC2 = 450;
-            leftTC0 = 50;
-            leftTC1 -= 500;
-        }
-        if (rightPower > 0.4 && rightTC1 > 600 && !fast_mode) {
-            rightTC2 = 450;
-            rightTC0 = 50;
-            rightTC1 -= 500;
-        }
-        if (rightTC0 > 0 || leftTC0 > 0) {
-            driveTT(0.3, 0.3);
-            while (!have_drive_encoders_reached(leftTC0, rightTC0) && (runtime.seconds()<7)) {
-                driveTT(0.3, 0.3);
-                // show_telemetry();
-            }
-        }
         driveTT(leftPower, rightPower);
         runtime.reset();
         //while (motorFR.isBusy() || motorBL.isBusy()) {
-        while (!have_drive_encoders_reached(leftTC1, rightTC1) && (runtime.seconds() < 5)) {
+        while (!have_drive_encoders_reached(leftCnt, rightCnt) && (runtime.seconds() < 5)) {
             driveTT(leftPower, rightPower);
-        }
-        if (rightTC2 > 0 || leftTC2 > 0) {
-            driveTT(0.2, 0.2);
-            while (!have_drive_encoders_reached(leftTC2, rightTC2) && (runtime.seconds() < 7)) {
-                driveTT(0.2, 0.2);
-                // show_telemetry();
-            }
         }
         stop_chassis();
     }
@@ -306,14 +273,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         }
     } // has_left_drive_encoder_reached
 
-    //--------------------------------------------------------------------------
-    //
-    // have_drive_encoders_reached
-    //
 
-    /**
-     * Indicate whether the right drive motor's encoder has reached a value.
-     */
     boolean has_right_drive_encoder_reached(double p_count) {
         DcMotor mt = encMotor;
         if (rightPower < 0) {
@@ -411,8 +371,6 @@ public class HardwareMiniBot { // extends LinearOpMode {
             }
         }
         driveTT(0, 0);
-        if (!fast_mode)
-            sleep(135);
     }
     public void TurnLeftD(double power, double degree) throws InterruptedException {
         double adjust_degree_gyro = GYRO_ROTATION_RATIO_L * (double) degree;
@@ -466,18 +424,16 @@ public class HardwareMiniBot { // extends LinearOpMode {
             }
         }
         driveTT(0, 0);
-        if (!fast_mode)
-            sleep(135);
     }
+
     public void StraightR(double power, double n_rotations) throws InterruptedException {
         DcMotor mt = encMotor;
         straight_mode = true;
         reset_chassis();
-        // set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
         int leftEncode = mt.getCurrentPosition();
         int rightEncode = mt.getCurrentPosition();
-        //motorBL.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
-        //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
         leftCnt = (int) (ONE_ROTATION * n_rotations);
         rightCnt = (int) (ONE_ROTATION * n_rotations);
         leftPower = rightPower = (float) power;
@@ -490,8 +446,6 @@ public class HardwareMiniBot { // extends LinearOpMode {
         }
         run_until_encoder(leftCnt, leftPower, rightCnt, rightPower);
         straight_mode = false;
-        if (!fast_mode)
-            sleep(135);
     }
 
     public void StraightIn(double power, double in) throws InterruptedException {
@@ -512,6 +466,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
             driveTT(0, 0);
         }
     }
+
     public boolean detectWhite() {
         int cur_sum_of_color_sensor = 0;
         if (!use_color_sensor) {
@@ -524,6 +479,15 @@ public class HardwareMiniBot { // extends LinearOpMode {
         return false;
     }
 
+    void kicker_up() {
+        if (sv_kicker==null)
+            return;
+        sv_kicker.setPosition(KICKER_UP);
+    }
+
+    void kicker_down() {
+        if (sv_kicker==null)
+            return;
+        sv_kicker.setPosition(KICKER_DOWN);
+    }
 }
-
-

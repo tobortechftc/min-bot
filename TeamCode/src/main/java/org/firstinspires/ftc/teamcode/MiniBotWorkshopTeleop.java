@@ -32,6 +32,7 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -48,20 +49,20 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-
+@Disabled
 @TeleOp(name="MiniBot: WorkshopTeleop", group="MiniBot")
 public class MiniBotWorkshopTeleop extends LinearOpMode {
 
-    /* Declare OpMode members. */
-    HardwareMiniBot robot           = new HardwareMiniBot();   // Use a Pushbot's hardware
-                                                               // could also use HardwarePushbotMatrix class.
+    // define robot for the hardware object
+    HardwareMiniBot robot = new HardwareMiniBot();
 
     @Override
     public void runOpMode() {
         double left;
         double right;
         double max;
-        double speedscale = 0.5;
+        double speedscale = 0.5; // determine the maximum speed
+
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
          */
@@ -76,20 +77,30 @@ public class MiniBotWorkshopTeleop extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            left = -gamepad1.left_stick_y;
+            right = -gamepad1.right_stick_y;
+            // Normalize the values so neither exceed +/- 1.0
+            max = Math.max(Math.abs(left), Math.abs(right));
+            if (max > 1.0)
+            {
+                left /= max;
+                right /= max;
+            }
 
+            left *= speedscale;
+            right *= speedscale;
+            robot.leftMotor.setPower(left);
+            robot.rightMotor.setPower(right);
+            if (gamepad1.y && (speedscale<1.0)) { // speed up
+                speedscale += 0.05;
+            }
+            else if (gamepad1.a && (speedscale>0.2)) { // slow down
+                speedscale -= 0.05;
+            }
 
-
-
-
-
-
-
-
-
-
-
-
-
+            telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
+            telemetry.addData("speed scale =", "%.2f", speedscale);
+            telemetry.update();
         }
     }
 }

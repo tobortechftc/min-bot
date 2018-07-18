@@ -34,6 +34,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -56,7 +57,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-
+@Disabled
 @TeleOp(name="MiniBot: RevTeleop", group="MiniBot")
 public class RevTeleop extends LinearOpMode {
 
@@ -181,15 +182,12 @@ public class RevTeleop extends LinearOpMode {
             // telemetry.addData("cm optical", "%.2f cm", robot.rangeSensor.cmOptical());
             telemetry.addData("cm", "%.2f cm", robot.rangeSensor.getDistance(DistanceUnit.CM));
             //telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
-            Color.RGBToHSV(robot.colorSensor.red() * 8, robot.colorSensor.green() * 8, robot.colorSensor.blue() * 8, robot.hsvValues);
-
             // send the info back to driver station using telemetry function.
            // telemetry.addData("LED", ? "On" : "Off");
             telemetry.addData("Clear", robot.colorSensor.alpha());
             telemetry.addData("Red  ", robot.colorSensor.red());
             telemetry.addData("Green", robot.colorSensor.green());
             telemetry.addData("Blue ", robot.colorSensor.blue());
-            telemetry.addData("Hue", robot.hsvValues[0]);
             telemetry.addData("Elbow", "%5.4f", robot.sv_elbow.getPosition());
             telemetry.addData("Shoulder", "%5.4f", robot.sv_shoulder.getPosition());
             // telemetry.addData("current_encoder =", "%d", robot.encMotor.getCurrentPosition());
