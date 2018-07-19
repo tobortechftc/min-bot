@@ -72,6 +72,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
     public boolean use_minibot = true;
     public boolean use_imu = true;
+    public boolean use_imu_correction = true;
     public boolean use_encoder = true;
     public boolean use_color_sensor = false;
     public boolean use_arm = false;
@@ -80,6 +81,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public boolean straight_mode = false;
     public float leftPower = 0;
     public float rightPower = 0;
+    public double correction_ratio = 0.9;
     public int leftCnt = 0; // left motor target counter
     public int rightCnt = 0; // right motor target counter
     public static int color_white = 200;
@@ -204,14 +206,14 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
     public void driveTT(double lp, double rp) {
         if(straight_mode) { // expect to go straight
-            if (use_imu) {
+            if (use_imu_correction) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
-                    if (rp > 0) rp *= 0.5;
-                    else lp *= 0.5;
+                    if (rp > 0) rp *= correction_ratio;
+                    else lp *= correction_ratio;
                 } else if (cur_heading - target_heading < -0.7) { // crook to right, slow down left motor
-                    if (lp > 0) lp *= 0.5;
-                    else rp *= 0.5;
+                    if (lp > 0) lp *= correction_ratio;
+                    else rp *= correction_ratio;
                 }
             }
         }

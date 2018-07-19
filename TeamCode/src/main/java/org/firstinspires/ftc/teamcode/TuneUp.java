@@ -171,6 +171,14 @@ public class TuneUp extends LinearOpMode {
                 gamepad1.reset();
                 sleep(400);
             }
+            if (gamepad1.left_bumper) {
+                robot.use_imu_correction = !robot.use_imu_correction;
+                sleep(400);
+            } else if (gamepad1.right_bumper && (robot.correction_ratio<0.99)) {
+               robot.correction_ratio += 0.01;
+            } else if (gamepad1.right_trigger>0.1 && (robot.correction_ratio>0.5)) {
+                robot.correction_ratio -= 0.01;
+            }
 
             telemetry.addData("0. ", "x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
             telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f)", INCREMENT,speedscale);
@@ -189,7 +197,9 @@ public class TuneUp extends LinearOpMode {
             }
 
             if (robot.use_imu) {
-                telemetry.addData("2. imu heading = ", "%5.4f", robot.imu_heading());
+                telemetry.addData("2. imu heading = ", "%5.4f (cor.=%s/r=%3.2f)",
+                        robot.imu_heading(),
+                        (robot.use_imu_correction?"Y":"N"), robot.correction_ratio);
             }
             if (robot.use_minibot) {
                 telemetry.addData("2. l/r pwd (enc)=", "%2.1f(%d)/%2.1f(%d)",
