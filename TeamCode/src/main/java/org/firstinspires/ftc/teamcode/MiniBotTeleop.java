@@ -54,6 +54,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
+@Disabled
 @TeleOp(name="MiniBot: Teleop", group="MiniBot")
 public class MiniBotTeleop extends LinearOpMode {
 

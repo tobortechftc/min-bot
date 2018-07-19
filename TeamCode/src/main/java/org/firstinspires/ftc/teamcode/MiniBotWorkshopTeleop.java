@@ -49,7 +49,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Disabled
 @TeleOp(name="MiniBot: WorkshopTeleop", group="MiniBot")
 public class MiniBotWorkshopTeleop extends LinearOpMode {
 
@@ -100,6 +99,14 @@ public class MiniBotWorkshopTeleop extends LinearOpMode {
 
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             telemetry.addData("speed scale =", "%.2f", speedscale);
+            if (robot.use_imu) {
+                telemetry.addData("2. imu heading = ", "%5.4f", robot.imu_heading());
+            }
+            if (robot.use_minibot) {
+                telemetry.addData("2. l/r pwd (enc)=", "%2.1f(%d)/%2.1f(%d)",
+                        robot.leftMotor.getPower(),robot.leftMotor.getCurrentPosition(),
+                        robot.rightMotor.getPower(),robot.rightMotor.getCurrentPosition());
+            }
             telemetry.update();
         }
     }

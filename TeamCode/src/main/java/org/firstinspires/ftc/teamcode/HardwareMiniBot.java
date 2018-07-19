@@ -7,6 +7,7 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -49,9 +50,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
-    final static double KICKER_INIT = 0.5;
-    final static double KICKER_UP = 0.5;
-    final static double KICKER_DOWN = 0.5;
+    final static double L_KICKER_INIT = 0.4;
+    final static double L_KICKER_UP = 0.5;
+    final static double L_KICKER_DOWN = 0.5;
+    final static double R_KICKER_INIT = 0.6;
+    final static double R_KICKER_UP = 0.5;
+    final static double R_KICKER_DOWN = 0.5;
 
     final static double ELBOW_INIT = 0.5;
     final static double SHOULDER_INIT = 0.5;
@@ -62,7 +66,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public DcMotor  encMotor = null;
     public Servo sv_shoulder = null;
     public Servo sv_elbow = null;
-    public Servo sv_kicker = null;
+    public Servo sv_l_kicker = null;
+    public Servo sv_r_kicker = null;
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
     public boolean use_minibot = true;
@@ -134,8 +139,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
         //encMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        leftMotor.setDirection(DcMotor.Direction.FORWARD);
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightMotor.setDirection(DcMotor.Direction.FORWARD);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -148,10 +153,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
             sv_elbow.setPosition(ELBOW_INIT);
             sv_shoulder.setPosition(SHOULDER_INIT);
         }
-        if (use_kicker) {
-            sv_kicker = hwMap.servo.get("sv_kicker");
-            sv_kicker.setPosition(KICKER_INIT);
-        }
+        //if (use_kicker) {
+            sv_l_kicker = hwMap.servo.get("sv_l_kicker");
+            sv_l_kicker.setPosition(L_KICKER_INIT);
+            sv_r_kicker = hwMap.servo.get("sv_r_kicker");
+            sv_r_kicker.setPosition(R_KICKER_INIT);
+        //}
         if (use_color_sensor) {
             colorSensor = hwMap.colorSensor.get("rev_co");
             colorSensor.enableLed(true);
@@ -263,7 +270,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     boolean has_left_drive_encoder_reached(double p_count) {
-        DcMotor mt = encMotor;
+        DcMotor mt = leftMotor;
         if (leftPower < 0) {
             //return (Math.abs(motorFL.getCurrentPosition()) < p_count);
             return (mt.getCurrentPosition() <= p_count);
@@ -275,7 +282,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
 
     boolean has_right_drive_encoder_reached(double p_count) {
-        DcMotor mt = encMotor;
+        DcMotor mt = rightMotor;
         if (rightPower < 0) {
             return (mt.getCurrentPosition() <= p_count);
         } else {
@@ -288,12 +295,11 @@ public class HardwareMiniBot { // extends LinearOpMode {
      * Indicate whether the drive motors' encoders have reached specified values.
      */
     boolean have_drive_encoders_reached(double p_left_count, double p_right_count) {
-        DcMotor mt = encMotor;
         boolean l_return = false;
         if (has_left_drive_encoder_reached(p_left_count) && has_right_drive_encoder_reached(p_right_count)) {
             l_return = true;
         } else if (has_left_drive_encoder_reached(p_left_count)) { // shift target encoder value from right to left
-            double diff = Math.abs(p_right_count - mt.getCurrentPosition()) / 2;
+            double diff = Math.abs(p_right_count - rightMotor.getCurrentPosition()) / 2;
             if (leftPower < 0) {
                 leftCnt -= diff;
             } else {
@@ -305,7 +311,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
                 rightCnt -= diff;
             }
         } else if (has_right_drive_encoder_reached(p_right_count)) { // shift target encoder value from left to right
-            double diff = Math.abs(p_left_count - mt.getCurrentPosition()) / 2;
+            double diff = Math.abs(p_left_count - leftMotor.getCurrentPosition()) / 2;
             if (rightPower < 0) {
                 rightCnt -= diff;
             } else {
@@ -427,12 +433,11 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public void StraightR(double power, double n_rotations) throws InterruptedException {
-        DcMotor mt = encMotor;
         straight_mode = true;
         reset_chassis();
 
-        int leftEncode = mt.getCurrentPosition();
-        int rightEncode = mt.getCurrentPosition();
+        int leftEncode = leftMotor.getCurrentPosition();
+        int rightEncode = rightMotor.getCurrentPosition();
 
         leftCnt = (int) (ONE_ROTATION * n_rotations);
         rightCnt = (int) (ONE_ROTATION * n_rotations);
@@ -479,15 +484,27 @@ public class HardwareMiniBot { // extends LinearOpMode {
         return false;
     }
 
-    void kicker_up() {
-        if (sv_kicker==null)
+    void l_kicker_up() {
+        if (sv_l_kicker==null)
             return;
-        sv_kicker.setPosition(KICKER_UP);
+        sv_l_kicker.setPosition(L_KICKER_UP);
     }
 
-    void kicker_down() {
-        if (sv_kicker==null)
+    void l_kicker_down() {
+        if (sv_l_kicker==null)
             return;
-        sv_kicker.setPosition(KICKER_DOWN);
+        sv_l_kicker.setPosition(L_KICKER_DOWN);
+    }
+
+    void r_kicker_up() {
+        if (sv_r_kicker==null)
+            return;
+        sv_r_kicker.setPosition(R_KICKER_UP);
+    }
+
+    void r_kicker_down() {
+        if (sv_r_kicker==null)
+            return;
+        sv_r_kicker.setPosition(R_KICKER_DOWN);
     }
 }

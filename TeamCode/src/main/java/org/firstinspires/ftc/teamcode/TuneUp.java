@@ -50,7 +50,6 @@ import com.qualcomm.robotcore.hardware.Servo;
  * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
-@Disabled
 @TeleOp(name="Tune-Up", group="MiniBot")
 public class TuneUp extends LinearOpMode {
 
@@ -64,26 +63,39 @@ public class TuneUp extends LinearOpMode {
 
         int cur_sv_ix = 0;
         boolean show_all = true;
+
+        /* Initialize the hardware variables.
+         * The init() method of the hardware class does all the work here
+         */
+        robot.use_imu = true;
+        robot.use_minibot = true;
+        robot.use_kicker = true;
+        robot.use_encoder = true;
+
+        robot.init(hardwareMap);
+
         Servo[] sv_list = {
-                robot.sv_kicker,
+                robot.sv_l_kicker,
+                robot.sv_r_kicker,
                 robot.sv_elbow,
                 robot.sv_shoulder
         };
         String [] sv_names = {
-                "Kicker",
+                "L-Kicker",
+                "R-Kicker",
                 "Elbow",
                 "Shoulder"
         };
 
         int num_servos = sv_list.length;
-        /* Initialize the hardware variables.
-         * The init() method of the hardware class does all the work here
-         */
-        robot.init(hardwareMap);
-
         // Send telemetry message to signify robot waiting;
         telemetry.addData("This is MiniBot.", "Need Tune-up?");    //
         telemetry.update();
+
+        while (cur_sv_ix < num_servos && sv_list[cur_sv_ix] == null) {
+            cur_sv_ix++;
+        }
+        if (cur_sv_ix==num_servos) cur_sv_ix = 0; // no servo available
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -175,8 +187,14 @@ public class TuneUp extends LinearOpMode {
             } else {
                 telemetry.addLine("1. No active servo to tune-up.");
             }
+
             if (robot.use_imu) {
                 telemetry.addData("2. imu heading = ", "%5.4f", robot.imu_heading());
+            }
+            if (robot.use_minibot) {
+                telemetry.addData("2. l/r pwd (enc)=", "%2.1f(%d)/%2.1f(%d)",
+                        robot.leftMotor.getPower(),robot.leftMotor.getCurrentPosition(),
+                        robot.rightMotor.getPower(),robot.rightMotor.getCurrentPosition());
             }
             telemetry.update();
         }
