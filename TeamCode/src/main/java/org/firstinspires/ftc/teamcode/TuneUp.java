@@ -60,9 +60,12 @@ public class TuneUp extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         double speedscale = 0.5; // determine the maximum speed
-
+        double left;
+        double right;
+        double max;
         int cur_sv_ix = 0;
         boolean show_all = true;
+        boolean tune_up_mode = true;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -103,6 +106,38 @@ public class TuneUp extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+            if (!tune_up_mode) { // tank drive
+                left = -gamepad1.left_stick_y;
+                right = -gamepad1.right_stick_y;
+                // Normalize the values so neither exceed +/- 1.0
+                max = Math.max(Math.abs(left), Math.abs(right));
+                if (max > 1.0) {
+                    left /= max;
+                    right /= max;
+                }
+                left *= speedscale;
+                right *= speedscale;
+                robot.leftMotor.setPower(left);
+                robot.rightMotor.setPower(right);
+            } else {
+                robot.leftMotor.setPower(0);
+                robot.rightMotor.setPower(0);
+                if (gamepad1.left_stick_y < -0.1) {
+                    INCREMENT += 0.001;
+                    if (INCREMENT > 0.5) INCREMENT = 0.5;
+                } else if (gamepad1.left_stick_y > 0.1) {
+                    INCREMENT -= 0.001;
+                    if (INCREMENT < 0.001) INCREMENT = 0.001;
+                }
+
+                if (gamepad1.right_stick_y < -0.1) {
+                    speedscale += 0.01;
+                    if (speedscale > 1.0) speedscale = 1.0;
+                } else if (gamepad1.right_stick_y > 0.1) {
+                    speedscale -= 0.01;
+                    if (speedscale < 0.1) speedscale = 0.1;
+                }
+            }
             if (robot.use_minibot) { // Unit Test for minibot
                 if (gamepad1.dpad_up) { // forward 24 inches
                     robot.StraightIn(speedscale, 24);
@@ -111,27 +146,13 @@ public class TuneUp extends LinearOpMode {
                 } else if (gamepad1.dpad_right) { // right turn 90 degree
                     robot.TurnRightD(speedscale, 90);
                 } else if (gamepad1.dpad_down) { // backward 24 inches
-                    robot.StraightIn(-1*speedscale, 24);
+                    robot.StraightIn(-1 * speedscale, 24);
                 }
             }
-
-            if (gamepad1.left_stick_y<-0.1) {
-                INCREMENT += 0.001;
-                if (INCREMENT>0.5) INCREMENT = 0.5;
-            } else if (gamepad1.left_stick_y>0.1) {
-                INCREMENT -= 0.001;
-                if (INCREMENT<0.001) INCREMENT = 0.001;
-            }
-
-            if (gamepad1.right_stick_y<-0.1) {
-                speedscale += 0.01;
-                if (speedscale>1.0) speedscale = 1.0;
-            } else if (gamepad1.right_stick_y>0.1) {
-                speedscale -= 0.01;
-                if (speedscale<0.1) speedscale = 0.1;
-            }
-
-            if (gamepad1.back && gamepad1.a) {
+            if (gamepad1.back && gamepad1.b) {
+                tune_up_mode = !tune_up_mode;
+                sleep(50);
+            } else if (gamepad1.back && gamepad1.a) {
                 show_all = !show_all;
                 sleep(50);
             } else if (gamepad1.a && (sv_list[cur_sv_ix] != null)) {
@@ -179,8 +200,11 @@ public class TuneUp extends LinearOpMode {
             } else if (gamepad1.right_trigger>0.1 && (robot.correction_ratio>0.5)) {
                 robot.correction_ratio -= 0.01;
             }
-
-            telemetry.addData("0. ", "x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
+            if (tune_up_mode) {
+                telemetry.addData("0. ", "Tune-Up x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
+            } else {
+                telemetry.addData("0. ", "Tank-Drive (push back+B to tune-up)");
+            }
             telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f)", INCREMENT,speedscale);
             if (show_all) {
                 for (int i = 0; i < num_servos; i++) {
