@@ -66,6 +66,7 @@ public class TuneUp extends LinearOpMode {
         int cur_sv_ix = 0;
         boolean show_all = true;
         boolean tune_up_mode = true;
+        boolean braking = true;
 
         /* Initialize the hardware variables.
          * The init() method of the hardware class does all the work here
@@ -150,21 +151,45 @@ public class TuneUp extends LinearOpMode {
                 }
             }
             if (gamepad1.back && gamepad1.b) {
-                tune_up_mode = !tune_up_mode;
-                sleep(50);
+                braking = !braking;
+                robot.change_chassis_braking_mode(braking);
+                sleep(300);
             } else if (gamepad1.back && gamepad1.a) {
                 show_all = !show_all;
-                sleep(50);
-            } else if (gamepad1.a && (sv_list[cur_sv_ix] != null)) {
-                double pos = sv_list[cur_sv_ix].getPosition();
-                if (pos <= (1 - INCREMENT)) {
-                    sv_list[cur_sv_ix].setPosition(pos + INCREMENT);
+                sleep(300);
+            } else if (gamepad1.back && gamepad1.y) {
+                tune_up_mode = !tune_up_mode;
+                sleep(300);
+            } else if (gamepad1.back && gamepad1.right_bumper) {
+                robot.r_kicker_up();
+            } else if (gamepad1.back && (gamepad1.right_trigger>0.1)) {
+                robot.r_kicker_down();
+            } else if (gamepad1.back && gamepad1.left_bumper) {
+                robot.l_kicker_up();
+            } else if (gamepad1.back && (gamepad1.left_trigger>0.1)) {
+                robot.l_kicker_down();
+            } else if (gamepad1.a) {
+                if (!tune_up_mode) {
+                    // slow down tank speed
+                    speedscale -= 0.05;
+                    if (speedscale < 0.2) speedscale = 0.2;
+                } else if (sv_list[cur_sv_ix] != null) {
+                    double pos = sv_list[cur_sv_ix].getPosition();
+                    if (pos <= (1 - INCREMENT)) {
+                        sv_list[cur_sv_ix].setPosition(pos + INCREMENT);
+                    }
                 }
                 sleep(50);
-            } else if (gamepad1.y && (sv_list[cur_sv_ix] != null)) {
-                double pos = sv_list[cur_sv_ix].getPosition();
-                if (pos >= INCREMENT) {
-                    sv_list[cur_sv_ix].setPosition(pos - INCREMENT);
+            } else if (gamepad1.y) {
+                if (!tune_up_mode) {
+                    // speedup tank drive
+                    speedscale += 0.05;
+                    if (speedscale > 1.0) speedscale = 1.0;
+                } else if (sv_list[cur_sv_ix] != null) {
+                    double pos = sv_list[cur_sv_ix].getPosition();
+                    if (pos >= INCREMENT) {
+                        sv_list[cur_sv_ix].setPosition(pos - INCREMENT);
+                    }
                 }
                 sleep(50);
             }
@@ -203,9 +228,10 @@ public class TuneUp extends LinearOpMode {
             if (tune_up_mode) {
                 telemetry.addData("0. ", "Tune-Up x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
             } else {
-                telemetry.addData("0. ", "Tank-Drive (push back+B to tune-up)");
+                telemetry.addData("0. ", "Tank-Drive (back+B to tune-up)");
             }
-            telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f)", INCREMENT,speedscale);
+            telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f(%s))",
+                    INCREMENT,speedscale,(braking?"B":"C"));
             if (show_all) {
                 for (int i = 0; i < num_servos; i++) {
                     if (sv_list[i] != null) {

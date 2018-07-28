@@ -50,12 +50,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
-    final static double L_KICKER_INIT = 0.4;
-    final static double L_KICKER_UP = 0.5;
-    final static double L_KICKER_DOWN = 0.5;
-    final static double R_KICKER_INIT = 0.6;
-    final static double R_KICKER_UP = 0.5;
-    final static double R_KICKER_DOWN = 0.5;
+    final static double L_KICKER_INIT = 0.99;
+    final static double L_KICKER_UP = 0.5517;
+    final static double L_KICKER_DOWN = 0.04;
+    final static double R_KICKER_INIT = 0.6044;
+    final static double R_KICKER_UP = 0.82;
+    final static double R_KICKER_DOWN = 0.06;
 
     final static double ELBOW_INIT = 0.5;
     final static double SHOULDER_INIT = 0.5;
@@ -172,6 +172,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Use RUN_USING_ENCODERS for better speed control even encoder is not used.
         leftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        change_chassis_braking_mode(true);
     }
 
     /***
@@ -197,6 +198,16 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
         // Reset the cycle clock for the next pass.
         period.reset();
+    }
+
+    public void change_chassis_braking_mode(boolean braking) {
+        if (braking) {
+            leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        } else {
+            leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        }
     }
 
     public double imu_heading() {
