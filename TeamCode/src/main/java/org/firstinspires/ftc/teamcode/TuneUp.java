@@ -228,7 +228,7 @@ public class TuneUp extends LinearOpMode {
             if (tune_up_mode) {
                 telemetry.addData("0. ", "Tune-Up x/b:sv sel, y/a:+/-(ix=%d)", cur_sv_ix);
             } else {
-                telemetry.addData("0. ", "Tank-Drive (back+B to tune-up)");
+                telemetry.addData("0. ", "Tank-Drive (back+Y to tune-up)");
             }
             telemetry.addData("0. ", "l/r stick-y: (inc.=%4.3f)/(speed=%2.1f(%s))",
                     INCREMENT,speedscale,(braking?"B":"C"));

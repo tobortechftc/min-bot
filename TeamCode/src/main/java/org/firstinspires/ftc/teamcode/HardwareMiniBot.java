@@ -50,12 +50,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
-    final static double L_KICKER_INIT = 0.99;
-    final static double L_KICKER_UP = 0.5517;
-    final static double L_KICKER_DOWN = 0.04;
-    final static double R_KICKER_INIT = 0.6044;
-    final static double R_KICKER_UP = 0.82;
-    final static double R_KICKER_DOWN = 0.06;
+    final static double L_KICKER_INIT = 0.558;
+    final static double L_KICKER_UP = 0.46;
+    final static double L_KICKER_DOWN = 0.71;
+    final static double R_KICKER_INIT = 0.63;
+    final static double R_KICKER_UP = 0.78;
+    final static double R_KICKER_DOWN = 0.44;
 
     final static double ELBOW_INIT = 0.5;
     final static double SHOULDER_INIT = 0.5;
