@@ -4,10 +4,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,10 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
-import static java.lang.Runtime.getRuntime;
 import static java.lang.Thread.sleep;
 
 /**
@@ -45,8 +41,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double INCHES_PER_ROTATION = 12.57; // inches per chassis motor rotation based on 16/24 gear ratio
     final static double GYRO_ROTATION_RATIO_L = 0.65; // 0.83; // Ratio of Gyro Sensor Left turn to prevent overshooting the turn.
     final static double GYRO_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of Gyro Sensor Right turn to prevent overshooting the turn.
-    final static double NAVX_ROTATION_RATIO_L = 0.65; // 0.84; // Ratio of NavX Sensor Left turn to prevent overshooting the turn.
-    final static double NAVX_ROTATION_RATIO_R = 0.65; // 0.84; // Ratio of NavX Sensor Right turn to prevent overshooting the turn.
+    final static double IMU_ROTATION_RATIO_L = 0.80; // 0.84; // Ratio of IMU Sensor Left turn to prevent overshooting the turn.
+    final static double IMU_ROTATION_RATIO_R = 0.80; // 0.84; // Ratio of IMU Sensor Right turn to prevent overshooting the turn.
     final static double DRIVE_RATIO_L = 1.0; //control veering by lowering left motor power
     final static double DRIVE_RATIO_R = 1.0; //control veering by lowering right motor power
 
@@ -341,8 +337,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
     public void TurnRightD(double power, double degree) throws InterruptedException {
 
-        double adjust_degree_gyro = GYRO_ROTATION_RATIO_R * (double) degree;
-        double adjust_degree_navx = NAVX_ROTATION_RATIO_R * (double) degree;
+        double adjust_degree_gyro = GYRO_ROTATION_RATIO_R * degree;
+        double adjust_degree_navx = IMU_ROTATION_RATIO_R * degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
         ElapsedTime     runtime = new ElapsedTime();
@@ -363,18 +359,18 @@ public class HardwareMiniBot { // extends LinearOpMode {
        if (use_imu) {
             current_pos = imu_heading();
             target_heading = current_pos - adjust_degree_navx;
-            if (target_heading <= -360) {
+            if (target_heading <= -180) {
                 target_heading += 360;
                 heading_cross_zero = true;
             }
-            if (heading_cross_zero && (current_pos <= -180)) {
+            if (heading_cross_zero && (current_pos <= 0)) {
                 current_pos += 360;
             }
             while ((current_pos >= target_heading) && (runtime.seconds() < 4.0)) {
                 current_pos = imu_heading();
                 // DbgLog.msg(String.format("imu current/target heading = %.2f/%.2f",current_pos,target_heading));
 
-                if (heading_cross_zero && (current_pos <= -180)) {
+                if (heading_cross_zero && (current_pos <= 0)) {
                     current_pos += 360;
                 }
                 driveTT(leftPower, rightPower);
@@ -393,7 +389,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
     public void TurnLeftD(double power, double degree) throws InterruptedException {
         double adjust_degree_gyro = GYRO_ROTATION_RATIO_L * (double) degree;
-        double adjust_degree_navx = NAVX_ROTATION_RATIO_L * (double) degree;
+        double adjust_degree_navx = IMU_ROTATION_RATIO_L * (double) degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
         ElapsedTime     runtime = new ElapsedTime();
@@ -417,17 +413,17 @@ public class HardwareMiniBot { // extends LinearOpMode {
         if (use_imu) {
             current_pos = imu_heading();
             target_heading = current_pos + adjust_degree_navx;
-            if (target_heading >= 0) {
+            if (target_heading >= 180) {
                 target_heading -= 360;
                 heading_cross_zero = true;
             }
-            if (heading_cross_zero && (current_pos >= -180)) {
+            if (heading_cross_zero && (current_pos >= 0)) {
                 current_pos -= 360;
             }
             //DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
             while ((current_pos <= target_heading) && (runtime.seconds() < 5.0)) {
                 current_pos = imu_heading();
-                if (heading_cross_zero && (current_pos >= -180)) {
+                if (heading_cross_zero && (current_pos >= 0)) {
                     current_pos -= 360;
                 }
                 driveTT(leftPower, rightPower);
