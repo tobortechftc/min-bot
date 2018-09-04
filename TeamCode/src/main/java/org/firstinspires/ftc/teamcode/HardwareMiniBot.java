@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 //import com.qualcomm.ftccommon.DbgLog;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -20,14 +21,14 @@ import static java.lang.Thread.sleep;
 
 /**
  * This is NOT an opmode.
- *
+ * <p>
  * This class can be used to define all the specific hardware for a single robot.
  * In this case that robot is a Pushbot.
  * See PushbotTeleopTank_Iterative and others classes starting with "Pushbot" for usage examples.
- *
+ * <p>
  * This hardware class assumes the following device names have been configured on the robot:
  * Note:  All names are lower case and some have single spaces between words.
- *
+ * <p>
  * Motor channel:  Left  drive motor:        "left_drive"
  * Motor channel:  Right drive motor:        "right_drive"
  * Motor channel:  Manipulator drive motor:  "left_arm"
@@ -57,9 +58,9 @@ public class HardwareMiniBot { // extends LinearOpMode {
     final static double SHOULDER_INIT = 0.5;
 
     /* Public OpMode members. */
-    public DcMotor  leftMotor   = null;
-    public DcMotor  rightMotor  = null;
-    public DcMotor  encMotor = null;
+    public DcMotor leftMotor = null;
+    public DcMotor rightMotor = null;
+    public DcMotor encMotor = null;
     public Servo sv_shoulder = null;
     public Servo sv_elbow = null;
     public Servo sv_l_kicker = null;
@@ -92,18 +93,18 @@ public class HardwareMiniBot { // extends LinearOpMode {
     Acceleration gravity;
 
     /* local OpMode members. */
-   HardwareMap hwMap           =  null;
-    private ElapsedTime period  = new ElapsedTime();
+    HardwareMap hwMap = null;
+    private ElapsedTime period = new ElapsedTime();
 
     /* Constructor */
-    public HardwareMiniBot(){
+    public HardwareMiniBot() {
 
     }
 
     //@Override
     //public void runOpMode() throws InterruptedException {
 //
-  //  }
+    //  }
 
     /* Initialize standard Hardware interfaces */
     public void init(HardwareMap ahwMap) {
@@ -115,11 +116,11 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // provide positional information.
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
-        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
         parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters.loggingEnabled      = true;
-        parameters.loggingTag          = "IMU";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
@@ -129,8 +130,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
         imu.initialize(parameters);
 
         // Define and Initialize Motors
-        leftMotor   = hwMap.dcMotor.get("left_drive");
-        rightMotor  = hwMap.dcMotor.get("right_drive");
+        leftMotor = hwMap.dcMotor.get("left_drive");
+        rightMotor = hwMap.dcMotor.get("right_drive");
 
         //rangeSensor = hwMap.get(ModernRoboticsI2cRangeSensor.class, "range_sensor");
         //encMotor    = hwMap.dcMotor.get("enmotor");
@@ -152,10 +153,10 @@ public class HardwareMiniBot { // extends LinearOpMode {
             sv_shoulder.setPosition(SHOULDER_INIT);
         }
         //if (use_kicker) {
-            sv_l_kicker = hwMap.servo.get("sv_l_kicker");
-            sv_l_kicker.setPosition(L_KICKER_INIT);
-            sv_r_kicker = hwMap.servo.get("sv_r_kicker");
-            sv_r_kicker.setPosition(R_KICKER_INIT);
+        sv_l_kicker = hwMap.servo.get("sv_l_kicker");
+        sv_l_kicker.setPosition(L_KICKER_INIT);
+        sv_r_kicker = hwMap.servo.get("sv_r_kicker");
+        sv_r_kicker.setPosition(R_KICKER_INIT);
         //}
         if (use_color_sensor) {
             colorSensor = hwMap.colorSensor.get("rev_co");
@@ -181,7 +182,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
      */
     public void waitForTick(long periodMs) {
 
-        long  remaining = periodMs - (long)period.milliseconds();
+        long remaining = periodMs - (long) period.milliseconds();
 
         // sleep for the remaining portion of the regular cycle period.
         if (remaining > 0) {
@@ -207,12 +208,12 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public double imu_heading() {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
     public void driveTT(double lp, double rp) {
-        if(straight_mode) { // expect to go straight
+        if (straight_mode) { // expect to go straight
             if (use_imu_correction) {
                 double cur_heading = imu_heading();
                 if (cur_heading - target_heading > 0.7) { // crook to left,  slow down right motor
@@ -227,8 +228,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
         if (Math.abs(rp) > 0.3 && Math.abs(lp) > 0.3) {
             rightMotor.setPower(rp * DRIVE_RATIO_R);
             leftMotor.setPower(lp * DRIVE_RATIO_L);
-        }
-        else{
+        } else {
             rightMotor.setPower(rp);
             leftMotor.setPower(lp);
         }
@@ -241,7 +241,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
         rightMotor.setPower(0);
         //encMotor.setPower(0);
     }
-    void reset_chassis()  {
+
+    void reset_chassis() {
         leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftCnt = 0;
@@ -252,23 +253,21 @@ public class HardwareMiniBot { // extends LinearOpMode {
 
     void stop_tobot() {
         stop_chassis();
-
     }
 
     public void goUntilWhite(double power) throws InterruptedException {
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         driveTT(power, power);
         int i = 0;
-        while (!detectWhite()  && (runtime.seconds() < 3) ) {
+        while (!detectWhite() && (runtime.seconds() < 3)) {
             if ((++i % 10) == 0)
                 driveTT(power, power);
         }
         stop_chassis();
     }
 
-
     public void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         driveTT(leftPower, rightPower);
         runtime.reset();
         //while (motorFR.isBusy() || motorBL.isBusy()) {
@@ -288,7 +287,6 @@ public class HardwareMiniBot { // extends LinearOpMode {
             return (mt.getCurrentPosition() >= p_count);
         }
     } // has_left_drive_encoder_reached
-
 
     boolean has_right_drive_encoder_reached(double p_count) {
         DcMotor mt = rightMotor;
@@ -341,22 +339,22 @@ public class HardwareMiniBot { // extends LinearOpMode {
         double adjust_degree_navx = IMU_ROTATION_RATIO_R * degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         reset_chassis();
         //set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
         //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         //motorBL.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
         int leftEncode = leftMotor.getCurrentPosition();
         int rightEncode = rightMotor.getCurrentPosition();
-            leftCnt = (int) (ONE_ROTATION * RROBOT * degree / 720.0);
-            rightCnt = (int) (-ONE_ROTATION * RROBOT * degree / 720.0);
-            rightPower = (float) -power;
+        leftCnt = (int) (ONE_ROTATION * RROBOT * degree / 720.0);
+        rightCnt = (int) (-ONE_ROTATION * RROBOT * degree / 720.0);
+        rightPower = (float) -power;
 
         leftCnt += leftEncode;
         rightCnt += rightEncode;
         leftPower = (float) power;
         // DbgLog.msg(String.format("imu Right Turn %.2f degree with %.2f power.", degree, power));
-       if (use_imu) {
+        if (use_imu) {
             current_pos = imu_heading();
             target_heading = current_pos - adjust_degree_navx;
             if (target_heading <= -180) {
@@ -387,12 +385,13 @@ public class HardwareMiniBot { // extends LinearOpMode {
         }
         driveTT(0, 0);
     }
+
     public void TurnLeftD(double power, double degree) throws InterruptedException {
         double adjust_degree_gyro = GYRO_ROTATION_RATIO_L * (double) degree;
         double adjust_degree_navx = IMU_ROTATION_RATIO_L * (double) degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         reset_chassis();
         //set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
         //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -463,7 +462,7 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     public void StraightIn(double power, double in) throws InterruptedException {
-       if (use_imu) {
+        if (use_imu) {
             target_heading = imu_heading();
         }
         if (use_encoder) {
@@ -494,25 +493,25 @@ public class HardwareMiniBot { // extends LinearOpMode {
     }
 
     void l_kicker_up() {
-        if (sv_l_kicker==null)
+        if (sv_l_kicker == null)
             return;
         sv_l_kicker.setPosition(L_KICKER_UP);
     }
 
     void l_kicker_down() {
-        if (sv_l_kicker==null)
+        if (sv_l_kicker == null)
             return;
         sv_l_kicker.setPosition(L_KICKER_DOWN);
     }
 
     void r_kicker_up() {
-        if (sv_r_kicker==null)
+        if (sv_r_kicker == null)
             return;
         sv_r_kicker.setPosition(R_KICKER_UP);
     }
 
     void r_kicker_down() {
-        if (sv_r_kicker==null)
+        if (sv_r_kicker == null)
             return;
         sv_r_kicker.setPosition(R_KICKER_DOWN);
     }
