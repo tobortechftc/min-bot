@@ -46,6 +46,7 @@ public class Chassis {
         motorLeft = hwMap.dcMotor.get("left_drive"); // should be motorLeft, not left_drive
         motorRight = hwMap.dcMotor.get("right_drive");
 
+        // initializes IMU
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
         parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -65,7 +66,11 @@ public class Chassis {
 
     }
 
-    // sets motors to left and right powers and corrects heading
+    /**
+     * sets motors to left and right powers, corrects heading
+     * @param lp sets left power
+     * @param rp sets right power
+     */
     public void drive_power(double lp, double rp) {
         if (straight_mode) {
             double cur_heading = imu_heading();
@@ -87,7 +92,12 @@ public class Chassis {
         }
     }
 
-    // pivots counterclockwise
+    /**
+     *
+     * @param power
+     * @param degree
+     * @throws InterruptedException
+     */
     public void rotate_left(double power, double degree) throws InterruptedException {
         double adjust_degree_navx = IMU_ROTATION_RATIO_L * (double) degree;
         double current_pos = 0;
