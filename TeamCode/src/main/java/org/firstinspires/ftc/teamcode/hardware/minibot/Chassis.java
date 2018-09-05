@@ -176,6 +176,7 @@ public class Chassis {
             }
     }
 
+
     // drives straight a given distance (in inches) using encoders
     public void drive_distance(double power, double in) throws InterruptedException {
         target_heading = imu_heading();
@@ -207,6 +208,10 @@ public class Chassis {
         runtime.reset();
         while (!have_drive_encoders_reached(leftCnt, rightCnt) && (runtime.seconds() < 5)) {
             drive_power(leftPower, rightPower);
+
+            //**************The line*****************
+            Core.APPLE_CORE.stuff.do_stuff();
+            //***************************************
         }
         stop_chassis();
     }
