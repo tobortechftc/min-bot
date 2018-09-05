@@ -17,10 +17,16 @@ public class Pusher {
         pusher.setPosition(PUSHER_INIT);
     }
 
+    /***
+     * moves pusher up
+     */
     public void pusher_up() {
         pusher.setPosition(PUSHER_UP);
     }
 
+    /***
+     * moves pusher down
+     */
     public void pusher_down() {
         pusher.setPosition(PUSHER_DOWN);
     }
