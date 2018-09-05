@@ -12,7 +12,7 @@ public class Kicker {
     final static double KICKER_DOWN = 0.71;
 
     public void init(HardwareMap hwMap) {
-        kicker = hwMap.servo.get("sv_kicker"); // should be kicker, not sv_kicker
+        kicker = hwMap.servo.get("sv_l_kicker"); // should be kicker, not sv_kicker
 
         kicker.setPosition(KICKER_INIT);
     }

@@ -12,7 +12,7 @@ public class Pusher {
     final static double PUSHER_DOWN = 0.44;
 
     public void init(HardwareMap hwMap) {
-        pusher = hwMap.servo.get("sv_pusher"); // should be pusher, not sv_pusher
+        pusher = hwMap.servo.get("sv_r_kicker"); // should be pusher, not sv_pusher
 
         pusher.setPosition(PUSHER_INIT);
     }
