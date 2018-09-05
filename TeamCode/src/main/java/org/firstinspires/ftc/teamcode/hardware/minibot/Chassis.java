@@ -92,10 +92,10 @@ public class Chassis {
         }
     }
 
-    /**
-     *
-     * @param power
-     * @param degree
+    /***
+     * Pivots robot counterclockwise using encoders and IMU
+     * @param power speed of rotation
+     * @param degree target degree from current orientation
      * @throws InterruptedException
      */
     public void rotate_left(double power, double degree) throws InterruptedException {
@@ -138,7 +138,12 @@ public class Chassis {
             }
     }
 
-    // pivots clockwise
+    /***
+     * Pivots robot counterclockwise using encoders and IMU
+     * @param power speed of rotation
+     * @param degree target degree from current orientation
+     * @throws InterruptedException
+     */
     public void rotate_right(double power, double degree) throws InterruptedException {
         double adjust_degree_navx = IMU_ROTATION_RATIO_R * degree;
         double current_pos = 0;
@@ -176,7 +181,13 @@ public class Chassis {
             }
     }
 
-    // drives straight a given distance (in inches) using encoders
+    /***
+     *
+     drives straight a given distance (in inches) using encoders
+     * @param power
+     * @param in
+     * @throws InterruptedException
+     */
     public void drive_distance(double power, double in) throws InterruptedException {
         target_heading = imu_heading();
         double rotations = in / INCHES_PER_ROTATION;

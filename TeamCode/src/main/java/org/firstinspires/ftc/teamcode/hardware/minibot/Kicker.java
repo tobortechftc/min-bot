@@ -17,9 +17,16 @@ public class Kicker {
         kicker.setPosition(KICKER_INIT);
     }
 
+    /***
+     * moves kicker up
+     */
     public void kicker_up() {
         kicker.setPosition(.46);
     }
+
+    /***
+     * moves kicker down
+     */
     public void kicker_down() {
         kicker.setPosition(.71);
     }
