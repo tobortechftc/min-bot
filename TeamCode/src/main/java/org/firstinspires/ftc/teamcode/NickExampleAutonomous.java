@@ -23,7 +23,7 @@ public class NickExampleAutonomous extends LinearOpMode implements YieldHandler 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot();
-
+        robot.core.set_yield_handler(this);
         try {
             robot.init(hardwareMap);
         }
