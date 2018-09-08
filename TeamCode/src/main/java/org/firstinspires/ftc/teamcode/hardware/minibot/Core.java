@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware.minibot;
 
-import org.firstinspires.ftc.teamcode.CharlieAutoPrototypeV3;
-import org.firstinspires.ftc.teamcode.support.Stuffer;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 
 /**
  * Created by 28761 on 9/4/2018.
@@ -9,15 +8,18 @@ import org.firstinspires.ftc.teamcode.support.Stuffer;
 
 public class Core {
 
-    Stuffer stuff;
+    private YieldHandler yieldHandler;
 
-    private Core() {
+    public Core() {
 
     }
 
-    public void set_stuff(Stuffer s) {
-        stuff = s;
+    public void set_yield_handler(YieldHandler y) {
+        yieldHandler = y;
     }
 
-    public static final Core APPLE_CORE = new Core();
+    public void yield(){
+        yieldHandler.on_yield();
+    }
+
 }

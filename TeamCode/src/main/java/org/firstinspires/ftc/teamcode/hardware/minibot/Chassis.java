@@ -221,7 +221,7 @@ public class Chassis {
             drive_power(leftPower, rightPower);
 
             //**************The line*****************
-            Core.APPLE_CORE.stuff.do_stuff();
+            //Core.APPLE_CORE.stuff.on_yield();
             //***************************************
         }
         stop_chassis();
