@@ -206,6 +206,7 @@ public class Chassis {
         straight_mode = false;
     }
 
+
     void run_until_encoder(int leftCnt, double leftPower, int rightCnt, double rightPower) throws InterruptedException {
         ElapsedTime runtime = new ElapsedTime();
         drive_power(leftPower, rightPower);
@@ -275,7 +276,7 @@ public class Chassis {
         return angles.firstAngle;
     }
 
-    void stop_chassis() {
+    public void stop_chassis() {
         motorLeft.setPower(0);
         motorRight.setPower(0);
         //encMotor.setPower(0);
