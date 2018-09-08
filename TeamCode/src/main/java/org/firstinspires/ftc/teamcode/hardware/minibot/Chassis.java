@@ -67,7 +67,7 @@ public class Chassis {
     }
 
     /**
-     * sets motors to left and right powers, corrects heading
+     * Sets motors to left and right powers, corrects heading
      * @param lp sets left power
      * @param rp sets right power
      */
@@ -82,14 +82,8 @@ public class Chassis {
                 else rp *= DRIVE_RATIO;
             }
         }
-        if (Math.abs(rp) > 0.3 && Math.abs(lp) > 0.3) {
-            motorLeft.setPower(lp * 1.0);
-            motorRight.setPower(rp * 1.0);
-        }
-        else{
-            motorLeft.setPower(lp);
-            motorRight.setPower(rp);
-        }
+        motorLeft.setPower(lp);
+        motorRight.setPower(rp);
     }
 
     /***
@@ -182,8 +176,7 @@ public class Chassis {
     }
 
     /***
-     *
-     drives straight a given distance (in inches) using encoders
+     * Drives straight a given distance (in inches) using encoders
      * @param power
      * @param in
      * @throws InterruptedException
@@ -221,7 +214,7 @@ public class Chassis {
             drive_power(leftPower, rightPower);
 
             //**************The line*****************
-            Core.APPLE_CORE.stuff.do_stuff();
+            //Core.APPLE_CORE.stuff.do_stuff();
             //***************************************
         }
         stop_chassis();
