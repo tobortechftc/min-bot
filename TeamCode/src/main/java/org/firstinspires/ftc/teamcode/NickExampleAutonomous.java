@@ -6,16 +6,17 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.minibot.Robot;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
+import org.firstinspires.ftc.teamcode.support.YieldHandler;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Created by 28761 on 9/4/2018.
+ * Created by Nick on 9/7/2018.
  */
 
 @Autonomous(name = "NickExampleAutonomous", group = "MiniBot")
-public class NickExampleAutonomous extends LinearOpMode {
+public class NickExampleAutonomous extends LinearOpMode implements YieldHandler {
 
     Robot robot;
 
@@ -62,7 +63,7 @@ public class NickExampleAutonomous extends LinearOpMode {
     }
 
 
-    void on_yield() {
+    public void on_yield() {
         // Throws an exception if the stop button is pressed.
         if (!opModeIsActive()) {
             throw new OpModeTerminationException();
