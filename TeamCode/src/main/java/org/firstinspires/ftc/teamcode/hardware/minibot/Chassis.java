@@ -282,7 +282,7 @@ public class Chassis {
         return angles.firstAngle;
     }
 
-    void stop_chassis() {
+    public void stop_chassis() {
         motorLeft.setPower(0);
         motorRight.setPower(0);
         //encMotor.setPower(0);
