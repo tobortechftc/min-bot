@@ -9,10 +9,11 @@ public class Robot {
     public Core core;
 
     public Robot() {
-        chassis = new Chassis();
-        kicker = new Kicker();
-        pusher = new Pusher();
         core = new Core();
+        chassis = new Chassis(core);
+        kicker = new Kicker(core);
+        pusher = new Pusher(core);
+
     }
 
     public void init(HardwareMap hwMap) {

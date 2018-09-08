@@ -17,6 +17,11 @@ public class Chassis {
 
     DcMotor motorRight;
     DcMotor motorLeft;
+    final Core core;
+
+    public Chassis(Core c) {
+        core = c;
+    }
 
     BNO055IMU imu;
     Orientation angles;
@@ -26,7 +31,7 @@ public class Chassis {
     // drive_power
     final static double DRIVE_RATIO = .9;
     boolean straight_mode = true; // if drive_power is used with encoders,true. else false
-    
+
     // drive_distance
     final static int ONE_ROTATION = 1120; // for AndyMark-40 motor encoder one rotation
     final static double INCHES_PER_ROTATION = 12.57; // inches per chassis motor rotation based on 16/24 gear ratio
@@ -39,7 +44,6 @@ public class Chassis {
     final static double WHEEL_TURN_COMPLETE = 6.63;  // number of wheel turns to get chassis 360-degree turn
     final static double IMU_ROTATION_RATIO_L = 0.80; // 0.84; // ratio of IMU Sensor Left turn to prevent overshooting the turn.
     final static double IMU_ROTATION_RATIO_R = 0.80; // 0.84; // ratio of IMU Sensor Right turn to prevent overshooting the turn.
-
 
 
     public void init(HardwareMap hwMap) {
@@ -68,6 +72,7 @@ public class Chassis {
 
     /**
      * sets motors to left and right powers, corrects heading
+     *
      * @param lp sets left power
      * @param rp sets right power
      */
@@ -85,8 +90,7 @@ public class Chassis {
         if (Math.abs(rp) > 0.3 && Math.abs(lp) > 0.3) {
             motorLeft.setPower(lp * 1.0);
             motorRight.setPower(rp * 1.0);
-        }
-        else{
+        } else {
             motorLeft.setPower(lp);
             motorRight.setPower(rp);
         }
@@ -102,7 +106,7 @@ public class Chassis {
         double adjust_degree_navx = IMU_ROTATION_RATIO_L * (double) degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         reset_chassis();
         //set_drive_modes(DcMotorController.RunMode.RUN_USING_ENCODERS);
         //motorFR.setMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
@@ -119,23 +123,23 @@ public class Chassis {
         rightCount += rightEncode;
 
 
+        current_pos = imu_heading();
+        target_heading = current_pos + adjust_degree_navx;
+        if (target_heading >= 180) {
+            target_heading -= 360;
+            heading_cross_zero = true;
+        }
+        if (heading_cross_zero && (current_pos >= 0)) {
+            current_pos -= 360;
+        }
+        //DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
+        while ((current_pos <= target_heading) && (runtime.seconds() < 5.0)) {
             current_pos = imu_heading();
-            target_heading = current_pos + adjust_degree_navx;
-            if (target_heading >= 180) {
-                target_heading -= 360;
-                heading_cross_zero = true;
-            }
             if (heading_cross_zero && (current_pos >= 0)) {
                 current_pos -= 360;
             }
-            //DbgLog.msg(String.format("imu Left Turn curr/target pos = %.2f/%.2f.", current_pos, target_heading));
-            while ((current_pos <= target_heading) && (runtime.seconds() < 5.0)) {
-                current_pos = imu_heading();
-                if (heading_cross_zero && (current_pos >= 0)) {
-                    current_pos -= 360;
-                }
-                drive_distance(leftPower, rightPower);
-            }
+            drive_distance(leftPower, rightPower);
+        }
     }
 
     /***
@@ -148,7 +152,7 @@ public class Chassis {
         double adjust_degree_navx = IMU_ROTATION_RATIO_R * degree;
         double current_pos = 0;
         boolean heading_cross_zero = false;
-        ElapsedTime     runtime = new ElapsedTime();
+        ElapsedTime runtime = new ElapsedTime();
         reset_chassis();
         int leftEncode = motorLeft.getCurrentPosition();
         int rightEncode = motorRight.getCurrentPosition();
@@ -161,24 +165,24 @@ public class Chassis {
         leftCount += leftEncode;
         rightCount += rightEncode;
         // DbgLog.msg(String.format("imu Right Turn %.2f degree with %.2f power.", degree, power));
+        current_pos = imu_heading();
+        target_heading = current_pos - adjust_degree_navx;
+        if (target_heading <= -180) {
+            target_heading += 360;
+            heading_cross_zero = true;
+        }
+        if (heading_cross_zero && (current_pos <= 0)) {
+            current_pos += 360;
+        }
+        while ((current_pos >= target_heading) && (runtime.seconds() < 4.0)) {
             current_pos = imu_heading();
-            target_heading = current_pos - adjust_degree_navx;
-            if (target_heading <= -180) {
-                target_heading += 360;
-                heading_cross_zero = true;
-            }
+            // DbgLog.msg(String.format("imu current/target heading = %.2f/%.2f",current_pos,target_heading));
+
             if (heading_cross_zero && (current_pos <= 0)) {
                 current_pos += 360;
             }
-            while ((current_pos >= target_heading) && (runtime.seconds() < 4.0)) {
-                current_pos = imu_heading();
-                // DbgLog.msg(String.format("imu current/target heading = %.2f/%.2f",current_pos,target_heading));
-
-                if (heading_cross_zero && (current_pos <= 0)) {
-                    current_pos += 360;
-                }
-                drive_distance(leftPower, rightPower);
-            }
+            drive_distance(leftPower, rightPower);
+        }
     }
 
     /***
@@ -278,7 +282,7 @@ public class Chassis {
     }
 
     double imu_heading() {
-        angles   = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return angles.firstAngle;
     }
 
@@ -288,7 +292,7 @@ public class Chassis {
         //encMotor.setPower(0);
     }
 
-    void reset_chassis()  {
+    void reset_chassis() {
         motorLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         motorRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftCount = 0;
