@@ -16,7 +16,7 @@ public class Kicker {
     }
 
     public void init(HardwareMap hwMap) {
-        kicker = hwMap.servo.get("sv_l_kicker"); // should be kicker, not sv_kicker
+        kicker = hwMap.servo.get("sv_l_kicker"); // should be kicker, not sv_l_kicker
 
         kicker.setPosition(KICKER_INIT);
     }
@@ -25,13 +25,13 @@ public class Kicker {
      * moves kicker up
      */
     public void kicker_up() {
-        kicker.setPosition(.46);
+        kicker.setPosition(KICKER_UP);
     }
 
     /***
      * moves kicker down
      */
     public void kicker_down() {
-        kicker.setPosition(.71);
+        kicker.setPosition(KICKER_DOWN);
     }
 }

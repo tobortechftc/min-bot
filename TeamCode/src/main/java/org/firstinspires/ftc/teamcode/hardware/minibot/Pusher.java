@@ -17,7 +17,7 @@ public class Pusher {
     }
 
     public void init(HardwareMap hwMap) {
-        pusher = hwMap.servo.get("sv_r_kicker"); // should be pusher, not sv_pusher
+        pusher = hwMap.servo.get("sv_r_kicker"); // should be pusher, not sv_r_pusher
 
         pusher.setPosition(PUSHER_INIT);
     }

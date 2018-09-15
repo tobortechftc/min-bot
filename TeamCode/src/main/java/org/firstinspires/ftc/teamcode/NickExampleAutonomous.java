@@ -64,6 +64,8 @@ public class NickExampleAutonomous extends LinearOpMode implements YieldHandler 
 
 
     public void on_yield() {
+        telemetry.addData("time (s):", this.getRuntime());
+        telemetry.update();
         // Throws an exception if the stop button is pressed.
         if (!opModeIsActive()) {
             throw new OpModeTerminationException();
