@@ -185,6 +185,17 @@ public class Chassis {
         }
     }
 
+    public void drive_time_without_imu(double power, long time) {
+        motorLeft.setPower(power);
+        motorRight.setPower(power);
+        long timeStart = System.currentTimeMillis();
+        while (System.currentTimeMillis() - timeStart < time) {
+            core.yield();
+        }
+        stop_chassis();
+    }
+
+
     /***
      *
      drives straight a given distance (in inches) using encoders

@@ -18,10 +18,11 @@ public class CharlieAutoPrototypeV4 extends LinearOpMode implements YieldHandler
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot();
+        robot.core.set_yield_handler(this);
         robot.init(hardwareMap);
         waitForStart();
         timeStart = System.currentTimeMillis();
-        robot.chassis.drive_distance(0.4, 80);
+        robot.chassis.drive_time_without_imu(0.4, 6000);
     }
 
     long timeStart;
@@ -33,6 +34,7 @@ public class CharlieAutoPrototypeV4 extends LinearOpMode implements YieldHandler
 
     @Override
     public void on_yield() {
+        telemetry.addLine("on_yield at time"+lapsed_time());
         if (lapsed_time() > 1000) {
             if (statge == 0) {
                 statge++;
@@ -45,17 +47,18 @@ public class CharlieAutoPrototypeV4 extends LinearOpMode implements YieldHandler
                 robot.kicker.kicker_up();
             }
         }
-        if (lapsed_time() > 1000) {
+        if (lapsed_time() > 3000) {
             if (statge == 2) {
                 statge++;
                 robot.pusher.pusher_down();
             }
         }
-        if (lapsed_time() > 1000) {
+        if (lapsed_time() > 4000) {
             if (statge == 3) {
                 statge++;
                 robot.kicker.kicker_down();
             }
         }
+        telemetry.update();
     }
 }
