@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.hardware.minibot.Robot;
 import org.firstinspires.ftc.teamcode.support.OpModeTerminationException;
 import org.firstinspires.ftc.teamcode.support.YieldHandler;
@@ -39,6 +40,7 @@ public class NickExampleAutonomous extends LinearOpMode implements YieldHandler 
         waitForStart();
 
         try {
+            this.resetStartTime();
             robot.kicker.kicker_up();
             sleep(1000);
             robot.kicker.kicker_down();
@@ -46,9 +48,9 @@ public class NickExampleAutonomous extends LinearOpMode implements YieldHandler 
             sleep(1000);
             robot.pusher.pusher_down();
             sleep(2000);
-            robot.chassis.drive_distance(.4, 20);
-            sleep(500);
-            robot.chassis.drive_distance(-.4, 20);
+            while (true) {
+                robot.chassis.drive_distance(.2,1000);
+            }
         }
         catch (OpModeTerminationException e) {
             robot.chassis.stop_chassis();
@@ -65,6 +67,7 @@ public class NickExampleAutonomous extends LinearOpMode implements YieldHandler 
 
     public void on_yield() {
         telemetry.addData("time (s):", this.getRuntime());
+        robot.chassis.show_diagnostic(this.telemetry);
         telemetry.update();
         // Throws an exception if the stop button is pressed.
         if (!opModeIsActive()) {

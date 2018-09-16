@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
@@ -68,6 +69,15 @@ public class Chassis {
         motorLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+    }
+
+    /**
+     * shows motor power in telemetry
+     * @param telemetry this.telemetry
+     */
+    public void show_diagnostic(Telemetry telemetry) {
+        telemetry.addData("motorLeft:", motorLeft.getPower());
+        telemetry.addData("motorRight:", motorRight.getPower());
     }
 
     /**
