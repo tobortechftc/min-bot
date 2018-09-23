@@ -54,7 +54,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Disabled
+
 @TeleOp(name="MiniBot: Teleop", group="MiniBot")
 public class MiniBotTeleop extends LinearOpMode {
 
@@ -148,13 +148,22 @@ public class MiniBotTeleop extends LinearOpMode {
             robot.rightMotor.setPower(right);
             if (gamepad1.y && (speedscale<1.0)) {
                 speedscale += 0.05;
-                //robot.waitForTick(40);
+                sleep(80);
             }
             else if (gamepad1.a && (speedscale>0.2)) {
                 speedscale -= 0.05;
-                //robot.waitForTick(40);
+                sleep(80);
             }
-
+            if (gamepad1.left_trigger>0.1) {
+                robot.l_kicker_down();
+            } else if (gamepad1.left_bumper) {
+                robot.l_kicker_up();
+            }
+            if (gamepad1.right_trigger>0.1) {
+                robot.r_kicker_down();
+            } else if (gamepad1.right_bumper) {
+                robot.r_kicker_up();
+            }
             telemetry.addData("left/right motor  =", "%.2f/%.2f", left,right);
             // telemetry.addData("prev left/right y  =", "%.2f/%.2f", prev_left_y,prev_right_y);
             telemetry.addData("left/right counter =", "%d/%d", left_event_counter, right_event_counter);
@@ -162,7 +171,7 @@ public class MiniBotTeleop extends LinearOpMode {
             telemetry.update();
 
             // Pause for metronome tick.  40 mS each cycle = update 25 times a second.
-            robot.waitForTick(40);
+            // robot.waitForTick(40);
             loop_count++;
         }
     }
