@@ -68,8 +68,8 @@ public class HardwareMiniBot { // extends LinearOpMode {
     public ModernRoboticsI2cRangeSensor rangeSensor;
 
     public boolean use_minibot = true;
-    public boolean use_imu = true;
-    public boolean use_imu_correction = true;
+    public boolean use_imu = false;
+    public boolean use_imu_correction = false;
     public boolean use_encoder = true;
     public boolean use_color_sensor = false;
     public boolean use_arm = false;
@@ -126,9 +126,10 @@ public class HardwareMiniBot { // extends LinearOpMode {
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        imu = hwMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-
+        if (use_imu) {
+            imu = hwMap.get(BNO055IMU.class, "imu");
+            imu.initialize(parameters);
+        }
         // Define and Initialize Motors
         leftMotor = hwMap.dcMotor.get("left_drive");
         rightMotor = hwMap.dcMotor.get("right_drive");
